@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/user/CLionProjects/Database_System_Principles_Project_1
+# Install script for directory: C:/Users/user/Documents/Github/SC3020-CZ4031-Database-System-Principles-Group-12
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -52,6 +52,6 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-  file(WRITE "C:/Users/user/CLionProjects/Database_System_Principles_Project_1/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+  file(WRITE "C:/Users/user/Documents/Github/SC3020-CZ4031-Database-System-Principles-Group-12/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

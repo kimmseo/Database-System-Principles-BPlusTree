@@ -9,8 +9,7 @@
 
 class Node;
 
-class Printer
-{
+class Printer {
 public:
     Printer();
     bool verbose() const;

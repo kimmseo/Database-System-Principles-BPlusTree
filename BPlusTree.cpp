@@ -13,15 +13,13 @@
 
 BPlusTree::BPlusTree(int aOrder) : fOrder{aOrder}, fRoot{nullptr} {}
 
-bool BPlusTree::isEmpty() const
-{
+bool BPlusTree::isEmpty() const {
     return !fRoot;
 }
 
-// INSERTION
+// Insertion
 
-void BPlusTree::insert(KeyType aKey, ValueType aValue)
-{
+void BPlusTree::insert(KeyType aKey, ValueType aValue) {
     if (isEmpty()) {
         startNewTree(aKey, aValue);
     } else {
@@ -35,8 +33,7 @@ void BPlusTree::startNewTree(KeyType aKey, ValueType aValue) {
     fRoot = newLeafNode;
 }
 
-void BPlusTree::insertIntoLeaf(KeyType aKey, ValueType aValue)
-{
+void BPlusTree::insertIntoLeaf(KeyType aKey, ValueType aValue) {
     LeafNode* leafNode = findLeafNode(aKey);
     if (!leafNode) {
         throw LeafNotFoundException(aKey);
@@ -56,8 +53,7 @@ void BPlusTree::insertIntoLeaf(KeyType aKey, ValueType aValue)
     }
 }
 
-void BPlusTree::insertIntoParent(Node *aOldNode, KeyType aKey, Node *aNewNode)
-{
+void BPlusTree::insertIntoParent(Node *aOldNode, KeyType aKey, Node *aNewNode) {
     InternalNode* parent = static_cast<InternalNode*>(aOldNode->parent());
     if (parent == nullptr) {
         fRoot = new InternalNode(fOrder);
@@ -76,19 +72,17 @@ void BPlusTree::insertIntoParent(Node *aOldNode, KeyType aKey, Node *aNewNode)
 }
 
 template <typename T>
-T* BPlusTree::split(T* aNode)
-{
+T* BPlusTree::split(T* aNode) {
     T* newNode = new T(fOrder, aNode->parent());
     aNode->moveHalfTo(newNode);
     return newNode;
 }
 
 
-// REMOVAL
+// Removal
 
 
-void BPlusTree::remove(KeyType aKey)
-{
+void BPlusTree::remove(KeyType aKey) {
     if (isEmpty()) {
         return;
     } else {
@@ -96,8 +90,7 @@ void BPlusTree::remove(KeyType aKey)
     }
 }
 
-void BPlusTree::removeFromLeaf(KeyType aKey)
-{
+void BPlusTree::removeFromLeaf(KeyType aKey) {
     LeafNode* leafNode = findLeafNode(aKey);
     if (!leafNode) {
         return;
@@ -112,8 +105,7 @@ void BPlusTree::removeFromLeaf(KeyType aKey)
 }
 
 template <typename N>
-void BPlusTree::coalesceOrRedistribute(N* aNode)
-{
+void BPlusTree::coalesceOrRedistribute(N* aNode) {
     if (aNode->isRoot()) {
         adjustRoot();
         return;
@@ -130,8 +122,7 @@ void BPlusTree::coalesceOrRedistribute(N* aNode)
 }
 
 template <typename N>
-void BPlusTree::coalesce(N* aNeighborNode, N* aNode, InternalNode* aParent, int aIndex)
-{
+void BPlusTree::coalesce(N* aNeighborNode, N* aNode, InternalNode* aParent, int aIndex) {
     if (aIndex == 0) {
         std::swap(aNode, aNeighborNode);
         aIndex = 1;
@@ -145,8 +136,7 @@ void BPlusTree::coalesce(N* aNeighborNode, N* aNode, InternalNode* aParent, int 
 }
 
 template <typename N>
-void BPlusTree::redistribute(N* aNeighborNode, N* aNode, InternalNode* aParent, int aIndex)
-{
+void BPlusTree::redistribute(N* aNeighborNode, N* aNode, InternalNode* aParent, int aIndex) {
     if (aIndex == 0) {
         aNeighborNode->moveFirstToEndOf(aNode);
     } else {
@@ -154,8 +144,7 @@ void BPlusTree::redistribute(N* aNeighborNode, N* aNode, InternalNode* aParent, 
     }
 }
 
-void BPlusTree::adjustRoot()
-{
+void BPlusTree::adjustRoot() {
     if (!fRoot->isLeaf() && fRoot->size() == 1) {
         auto discardedNode = static_cast<InternalNode*>(fRoot);
         fRoot = static_cast<InternalNode*>(fRoot)->removeAndReturnOnlyChild();
@@ -168,10 +157,9 @@ void BPlusTree::adjustRoot()
 }
 
 
-// UTILITIES AND PRINTING
+// Utilitise and printing
 
-LeafNode* BPlusTree::findLeafNode(KeyType aKey, bool aPrinting, bool aVerbose)
-{
+LeafNode* BPlusTree::findLeafNode(KeyType aKey, bool aPrinting, bool aVerbose) {
     if (isEmpty()) {
         if (aPrinting) {
             std::cout << "Not found: empty tree." << std::endl;
@@ -198,8 +186,7 @@ LeafNode* BPlusTree::findLeafNode(KeyType aKey, bool aPrinting, bool aVerbose)
     return static_cast<LeafNode*>(node);
 }
 
-void BPlusTree::readInputFromFile(std::string aFileName)
-{
+void BPlusTree::readInputFromFile(std::string aFileName) {
     int key;
     std::ifstream input(aFileName);
     while (input) {
@@ -208,20 +195,17 @@ void BPlusTree::readInputFromFile(std::string aFileName)
     }
 }
 
-void BPlusTree::print(bool aVerbose)
-{
+void BPlusTree::print(bool aVerbose) {
     fPrinter.setVerbose(aVerbose);
     fPrinter.printTree(fRoot);
 }
 
-void BPlusTree::printLeaves(bool aVerbose)
-{
+void BPlusTree::printLeaves(bool aVerbose) {
     fPrinter.setVerbose(aVerbose);
     fPrinter.printLeaves(fRoot);
 }
 
-void BPlusTree::destroyTree()
-{
+void BPlusTree::destroyTree() {
     if (fRoot->isLeaf()) {
         delete static_cast<LeafNode*>(fRoot);
     } else {
@@ -230,13 +214,11 @@ void BPlusTree::destroyTree()
     fRoot = nullptr;
 }
 
-void BPlusTree::printValue(KeyType aKey, bool aVerbose)
-{
+void BPlusTree::printValue(KeyType aKey, bool aVerbose) {
     printValue(aKey, false, aVerbose);
 }
 
-void BPlusTree::printValue(KeyType aKey, bool aPrintPath, bool aVerbose)
-{
+void BPlusTree::printValue(KeyType aKey, bool aPrintPath, bool aVerbose) {
     LeafNode* leaf = findLeafNode(aKey, aPrintPath, aVerbose);
     if (!leaf) {
         std::cout << "Leaf not found with key " << aKey << "." << std::endl;
@@ -258,13 +240,11 @@ void BPlusTree::printValue(KeyType aKey, bool aPrintPath, bool aVerbose)
     std::cout << "\tKey: " << aKey << "   Value: " << record->value() << std::endl;
 }
 
-void BPlusTree::printPathTo(KeyType aKey, bool aVerbose)
-{
+void BPlusTree::printPathTo(KeyType aKey, bool aVerbose) {
     printValue(aKey, true, aVerbose);
 }
 
-void BPlusTree::printRange(KeyType aStart, KeyType aEnd)
-{
+void BPlusTree::printRange(KeyType aStart, KeyType aEnd) {
     auto rangeVector = range(aStart, aEnd);
     for (auto entry : rangeVector) {
         std::cout << "Key: " << std::get<0>(entry);
@@ -273,8 +253,7 @@ void BPlusTree::printRange(KeyType aStart, KeyType aEnd)
     }
 }
 
-std::vector<BPlusTree::EntryType> BPlusTree::range(KeyType aStart, KeyType aEnd)
-{
+std::vector<BPlusTree::EntryType> BPlusTree::range(KeyType aStart, KeyType aEnd) {
     auto startLeaf = findLeafNode(aStart);
     auto endLeaf = findLeafNode(aEnd);
     std::vector<std::tuple<KeyType, ValueType, LeafNode*>> entries;

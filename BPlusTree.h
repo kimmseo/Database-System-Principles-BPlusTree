@@ -15,9 +15,8 @@ class LeafNode;
 class Node;
 
 
-/// Main class providing the API for the Interactive B+ Tree.
-class BPlusTree
-{
+/// Main class providing the API for the B+ Tree
+class BPlusTree {
 public:
     /// Sole constructor.  Accepts an optional order for the B+ Tree.
     /// The default order will provide a reasonable demonstration of the
