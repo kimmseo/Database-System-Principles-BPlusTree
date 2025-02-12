@@ -1,3 +1,0 @@
-C:/Users/user/Documents/Github/SC3020-CZ4031-Database-System-Principles-Group-12/cmake-build-debug/CMakeFiles/Database_System_Principles_Project_1.dir
-C:/Users/user/Documents/Github/SC3020-CZ4031-Database-System-Principles-Group-12/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/user/Documents/Github/SC3020-CZ4031-Database-System-Principles-Group-12/cmake-build-debug/CMakeFiles/rebuild_cache.dir
