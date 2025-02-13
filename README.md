@@ -1,3 +1,6 @@
+[Google Docs Project Report](https://docs.google.com/document/d/1WtS6wBsTzRH7-qIsAmv6fLDHr4i85h7oSXdD7ya9iFw/edit?usp=sharing)
+
+
 # Build Instructions
 
 ## **1️⃣ Prerequisites**
