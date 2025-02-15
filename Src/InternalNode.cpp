@@ -124,11 +124,18 @@ Node* InternalNode::removeAndReturnOnlyChild()
 
 KeyType InternalNode::replaceAndReturnFirstKey()
 {
-    // Typically used after splitting
+    // Get the first key before modifying the mappings
     KeyType newKey = fMappings[0].first;
-    fMappings[0].first = 0; // or some placeholder
-    return newKey;
+
+    // Instead of erasing the first key, shift children correctly
+    fLeftChild = fMappings[0].second; // Move first child up
+
+    // Remove the first (key, child) pair, but keep the structure
+    fMappings.erase(fMappings.begin());
+
+    return newKey;  // Return the key to be inserted into the parent
 }
+
 
 void InternalNode::moveHalfTo(InternalNode* aRecipient)
 {
