@@ -39,6 +39,7 @@ public:
     void queueUpChildren(std::queue<Node*>* aQueue);
     [[nodiscard]] const KeyType firstKey() const override;
 private:
+    Node* fLeftChild;
     void copyHalfFrom(std::vector<MappingType>& aMappings);
     void copyAllFrom(std::vector<MappingType>& aMappings);
     void copyLastFrom(MappingType aPair);
