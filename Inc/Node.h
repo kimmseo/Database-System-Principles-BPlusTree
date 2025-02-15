@@ -9,7 +9,7 @@
 #include "Definitions.h"
 
 // Dummy key for when only entry's pointer has meaning
-const KeyType DUMMY_KEY{-1};
+//const KeyType DUMMY_KEY{-1};
 
 // Abstract class
 class Node {

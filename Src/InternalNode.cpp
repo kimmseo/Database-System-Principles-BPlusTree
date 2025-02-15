@@ -124,9 +124,13 @@ Node* InternalNode::removeAndReturnOnlyChild()
 
 KeyType InternalNode::replaceAndReturnFirstKey()
 {
-    // Typically used after splitting
     KeyType newKey = fMappings[0].first;
-    fMappings[0].first = 0; // or some placeholder
+
+    fLeftChild = fMappings[0].second;
+
+
+    fMappings.erase(fMappings.begin());
+
     return newKey;
 }
 
