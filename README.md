@@ -14,3 +14,4 @@ cmake --build build   # Compile the project
 
 ./build/Database_System_Principles_Project_1 # run the executable
 
+Debug\Database_System_Principles_Project_1.exe # run this if above doesn't work
