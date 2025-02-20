@@ -11,15 +11,11 @@
 
 Printer::Printer() : fVerbose(false) {}
 
-bool Printer::verbose() const {
-    return fVerbose;
-}
+bool Printer::verbose() const { return fVerbose; }
 
-void Printer::setVerbose(bool aVerbose) {
-    fVerbose = aVerbose;
-}
+void Printer::setVerbose(bool aVerbose) { fVerbose = aVerbose; }
 
-void Printer::printTree(Node *aRoot) const {
+void Printer::printTree(Node* aRoot) const {
     if (!aRoot) {
         printEmptyTree();
     } else {
@@ -27,11 +23,9 @@ void Printer::printTree(Node *aRoot) const {
     }
 }
 
-void Printer::printEmptyTree() const {
-    std::cout << "Empty tree." << std::endl;
-}
+void Printer::printEmptyTree() const { std::cout << "Empty tree." << std::endl; }
 
-void Printer::printNonEmptyTree(Node *aRoot) const {
+void Printer::printNonEmptyTree(Node* aRoot) const {
     std::queue<Node*> queue0;
     std::queue<Node*> queue1;
     auto currentRank = &queue0;
@@ -45,9 +39,10 @@ void Printer::printNonEmptyTree(Node *aRoot) const {
     }
 }
 
-void Printer::printCurrentRank(std::queue<Node*>* aCurrentRank, std::queue<Node*>* aNextRank) const {
+void Printer::printCurrentRank(std::queue<Node*>* aCurrentRank,
+                               std::queue<Node*>* aNextRank) const {
     std::cout << "|";
-    while(!aCurrentRank->empty()) {
+    while (!aCurrentRank->empty()) {
         Node* currentNode = aCurrentRank->front();
         std::cout << " " << currentNode->toString(verbose());
         std::cout << " |";
@@ -60,7 +55,7 @@ void Printer::printCurrentRank(std::queue<Node*>* aCurrentRank, std::queue<Node*
     std::cout << std::endl;
 }
 
-void Printer::printLeaves(Node *aRoot) {
+void Printer::printLeaves(Node* aRoot) {
     if (!aRoot) {
         printEmptyTree();
         return;

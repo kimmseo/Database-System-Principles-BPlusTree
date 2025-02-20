@@ -12,7 +12,7 @@
 #include "Record.h"
 
 class LeafNode : public Node {
-public:
+  public:
     explicit LeafNode(int aOrder);
     explicit LeafNode(int aOrder, Node* aParent);
     ~LeafNode() override;
@@ -37,7 +37,8 @@ public:
     void copyRangeUntil(KeyType aKey, std::vector<EntryType>& aVector);
     void copyRange(std::vector<EntryType>& aVector);
     [[nodiscard]] std::string toString(bool aVerbose = false) const override;
-private:
+
+  private:
     void copyHalfFrom(std::vector<MappingType>& aMappings);
     void copyAllFrom(std::vector<MappingType>& aMappings);
     void copyLastFrom(MappingType aPair);
@@ -46,4 +47,4 @@ private:
     LeafNode* fNext;
 };
 
-#endif //LEAFNODE_H
+#endif  // LEAFNODE_H

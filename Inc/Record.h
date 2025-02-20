@@ -8,14 +8,15 @@
 #include "Definitions.h"
 
 class Record {
-public:
+  public:
     explicit Record(ValueType aValue);
     ValueType value() const;
     void setValue(ValueType aValue);
     std::string toString() const;
-private:
+
+  private:
     Record() : fValue(0) {}
     ValueType fValue;
 };
 
-#endif //RECORD_H
+#endif  // RECORD_H

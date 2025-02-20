@@ -10,17 +10,18 @@
 class Node;
 
 class Printer {
-public:
+  public:
     Printer();
     bool verbose() const;
     void setVerbose(bool aVerbose);
     void printTree(Node* aRoot) const;
     void printLeaves(Node* aRoot);
-private:
+
+  private:
     void printEmptyTree() const;
     void printNonEmptyTree(Node* aRoot) const;
     void printCurrentRank(std::queue<Node*>* aCurrentRank, std::queue<Node*>* aNextRank) const;
     bool fVerbose;
 };
 
-#endif //PRINTER_H
+#endif  // PRINTER_H

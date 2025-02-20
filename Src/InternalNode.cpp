@@ -6,18 +6,12 @@
 #include "Exceptions.h"
 #include "InternalNode.h"
 
-InternalNode::InternalNode(int aOrder)
-    : Node(aOrder), fLeftChild(nullptr)
-{
-}
+InternalNode::InternalNode(int aOrder) : Node(aOrder), fLeftChild(nullptr) {}
 
 InternalNode::InternalNode(int aOrder, Node* aParent)
-    : Node(aOrder, aParent), fLeftChild(nullptr)
-{
-}
+    : Node(aOrder, aParent), fLeftChild(nullptr) {}
 
-InternalNode::~InternalNode()
-{
+InternalNode::~InternalNode() {
     // Clean up left child
     delete fLeftChild;
 
@@ -27,47 +21,33 @@ InternalNode::~InternalNode()
     }
 }
 
-bool InternalNode::isLeaf() const
-{
-    return false;
-}
+bool InternalNode::isLeaf() const { return false; }
 
-int InternalNode::size() const
-{
+int InternalNode::size() const {
     // The "size" is the number of real keys in fMappings
     return static_cast<int>(fMappings.size());
 }
 
-int InternalNode::minSize() const
-{
+int InternalNode::minSize() const {
     // Same logic as your original: floor(maxSize()/2)
     return maxSize() / 2;
 }
 
-int InternalNode::maxSize() const
-{
+int InternalNode::maxSize() const {
     // Usually order() - 1, as in your code
     return order() - 1;
 }
 
-KeyType InternalNode::keyAt(int aIndex) const
-{
-    return fMappings[aIndex].first;
-}
+KeyType InternalNode::keyAt(int aIndex) const { return fMappings[aIndex].first; }
 
-void InternalNode::setKeyAt(int aIndex, KeyType aKey)
-{
-    fMappings[aIndex].first = aKey;
-}
+void InternalNode::setKeyAt(int aIndex, KeyType aKey) { fMappings[aIndex].first = aKey; }
 
-Node* InternalNode::firstChild() const
-{
+Node* InternalNode::firstChild() const {
     // Return the leftmost child pointer
     return fLeftChild;
 }
 
-void InternalNode::populateNewRoot(Node* aOldNode, KeyType aNewKey, Node* aNewNode)
-{
+void InternalNode::populateNewRoot(Node* aOldNode, KeyType aNewKey, Node* aNewNode) {
     // The old node becomes the left child
     fLeftChild = aOldNode;
     fLeftChild->setParent(this);
@@ -77,8 +57,7 @@ void InternalNode::populateNewRoot(Node* aOldNode, KeyType aNewKey, Node* aNewNo
     aNewNode->setParent(this);
 }
 
-int InternalNode::insertNodeAfter(Node* aOldNode, KeyType aNewKey, Node* aNewNode)
-{
+int InternalNode::insertNodeAfter(Node* aOldNode, KeyType aNewKey, Node* aNewNode) {
     // If the old node is the left child, insert at the front of fMappings
     if (aOldNode == fLeftChild) {
         // We want the new key/child to appear as the first pair
@@ -96,21 +75,18 @@ int InternalNode::insertNodeAfter(Node* aOldNode, KeyType aNewKey, Node* aNewNod
             throw NodeNotFoundException(aOldNode->toString(), toString());
         }
         // Insert right after that index
-        fMappings.insert(fMappings.begin() + index + 1,
-                         std::make_pair(aNewKey, aNewNode));
+        fMappings.insert(fMappings.begin() + index + 1, std::make_pair(aNewKey, aNewNode));
     }
     aNewNode->setParent(this);
     return size();
 }
 
-void InternalNode::remove(int aIndex)
-{
+void InternalNode::remove(int aIndex) {
     // Remove the (key, child) pair at aIndex
     fMappings.erase(fMappings.begin() + aIndex);
 }
 
-Node* InternalNode::removeAndReturnOnlyChild()
-{
+Node* InternalNode::removeAndReturnOnlyChild() {
     // If there are no real keys, the only child is fLeftChild
     if (fMappings.empty()) {
         Node* onlyChild = fLeftChild;
@@ -122,13 +98,12 @@ Node* InternalNode::removeAndReturnOnlyChild()
     return nullptr;
 }
 
-KeyType InternalNode::replaceAndReturnFirstKey()
-{
+KeyType InternalNode::replaceAndReturnFirstKey() {
     // Get the first key before modifying the mappings
     KeyType newKey = fMappings[0].first;
 
     // Instead of erasing the first key, shift children correctly
-    fLeftChild = fMappings[0].second; // Move first child up
+    fLeftChild = fMappings[0].second;  // Move first child up
 
     // Remove the first (key, child) pair, but keep the structure
     fMappings.erase(fMappings.begin());
@@ -136,9 +111,7 @@ KeyType InternalNode::replaceAndReturnFirstKey()
     return newKey;  // Return the key to be inserted into the parent
 }
 
-
-void InternalNode::moveHalfTo(InternalNode* aRecipient)
-{
+void InternalNode::moveHalfTo(InternalNode* aRecipient) {
     // Example: move half the pairs
     size_t total = fMappings.size();
     size_t half = total / 2;
@@ -155,8 +128,7 @@ void InternalNode::moveHalfTo(InternalNode* aRecipient)
     // (Depends on how you handle the "split" boundary)
 }
 
-void InternalNode::moveAllTo(InternalNode* aRecipient, int /*aParentIndex*/)
-{
+void InternalNode::moveAllTo(InternalNode* aRecipient, int /*aParentIndex*/) {
     // If aRecipient has no children yet, set its left child
     if (aRecipient->fMappings.empty() && !aRecipient->fLeftChild) {
         aRecipient->fLeftChild = fLeftChild;
@@ -173,24 +145,21 @@ void InternalNode::moveAllTo(InternalNode* aRecipient, int /*aParentIndex*/)
     fLeftChild = nullptr;
 }
 
-void InternalNode::moveFirstToEndOf(InternalNode* aRecipient)
-{
+void InternalNode::moveFirstToEndOf(InternalNode* aRecipient) {
     // Move the first (key, child) in fMappings to the end of aRecipient->fMappings
     aRecipient->fMappings.push_back(fMappings.front());
     aRecipient->fMappings.back().second->setParent(aRecipient);
     fMappings.erase(fMappings.begin());
 }
 
-void InternalNode::moveLastToFrontOf(InternalNode* aRecipient, int /*aParentIndex*/)
-{
+void InternalNode::moveLastToFrontOf(InternalNode* aRecipient, int /*aParentIndex*/) {
     // Move the last (key, child) in fMappings to the front of aRecipient->fMappings
     aRecipient->fMappings.insert(aRecipient->fMappings.begin(), fMappings.back());
     aRecipient->fMappings.front().second->setParent(aRecipient);
     fMappings.pop_back();
 }
 
-Node* InternalNode::lookup(KeyType aKey) const
-{
+Node* InternalNode::lookup(KeyType aKey) const {
     // If no real keys, go left
     if (fMappings.empty()) {
         return fLeftChild;
@@ -212,8 +181,7 @@ Node* InternalNode::lookup(KeyType aKey) const
     return fMappings.back().second;
 }
 
-int InternalNode::nodeIndex(Node* aNode) const
-{
+int InternalNode::nodeIndex(Node* aNode) const {
     // If it's the left child, index is 0
     if (fLeftChild == aNode) {
         return 0;
@@ -228,8 +196,7 @@ int InternalNode::nodeIndex(Node* aNode) const
     throw NodeNotFoundException(aNode->toString(), toString());
 }
 
-Node* InternalNode::neighbour(int aIndex) const
-{
+Node* InternalNode::neighbour(int aIndex) const {
     // aIndex == 0 => left child
     if (aIndex == 0) {
         return fLeftChild;
@@ -238,14 +205,13 @@ Node* InternalNode::neighbour(int aIndex) const
     return fMappings[aIndex - 1].second;
 }
 
-std::string InternalNode::toString(bool aVerbose) const
-{
+std::string InternalNode::toString(bool aVerbose) const {
     std::ostringstream oss;
     if (aVerbose) {
         oss << "[" << std::hex << this << std::dec << "]<" << size() << "> ";
     }
     bool first = true;
-    for (auto &m : fMappings) {
+    for (auto& m : fMappings) {
         if (!first) {
             oss << " ";
         }
@@ -258,31 +224,28 @@ std::string InternalNode::toString(bool aVerbose) const
     return oss.str();
 }
 
-void InternalNode::queueUpChildren(std::queue<Node*>* aQueue)
-{
+void InternalNode::queueUpChildren(std::queue<Node*>* aQueue) {
     // Push the left child
     if (fLeftChild) {
         aQueue->push(fLeftChild);
     }
     // Then push all children in fMappings
-    for (auto &mapping : fMappings) {
+    for (auto& mapping : fMappings) {
         if (mapping.second) {
             aQueue->push(mapping.second);
         }
     }
 }
 
-const KeyType InternalNode::firstKey() const
-{
+const KeyType InternalNode::firstKey() const {
     // If empty, there's no "first key"
     if (fMappings.empty()) {
-        return 0; // or some sentinel
+        return 0;  // or some sentinel
     }
     return fMappings[0].first;
 }
 
-void InternalNode::copyHalfFrom(std::vector<MappingType>& aMappings)
-{
+void InternalNode::copyHalfFrom(std::vector<MappingType>& aMappings) {
     // For splitting. Example approach:
     size_t total = aMappings.size();
     size_t half = total / 2;
@@ -292,22 +255,19 @@ void InternalNode::copyHalfFrom(std::vector<MappingType>& aMappings)
     }
 }
 
-void InternalNode::copyAllFrom(std::vector<MappingType>& aMappings)
-{
-    for (auto &m : aMappings) {
+void InternalNode::copyAllFrom(std::vector<MappingType>& aMappings) {
+    for (auto& m : aMappings) {
         fMappings.push_back(m);
         m.second->setParent(this);
     }
 }
 
-void InternalNode::copyLastFrom(MappingType aPair)
-{
+void InternalNode::copyLastFrom(MappingType aPair) {
     fMappings.push_back(aPair);
     fMappings.back().second->setParent(this);
 }
 
-void InternalNode::copyFirstFrom(MappingType aPair, int /*aParentIndex*/)
-{
+void InternalNode::copyFirstFrom(MappingType aPair, int /*aParentIndex*/) {
     fMappings.insert(fMappings.begin(), aPair);
     fMappings.front().second->setParent(this);
 }

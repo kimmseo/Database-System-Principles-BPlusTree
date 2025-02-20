@@ -14,10 +14,9 @@ class InternalNode;
 class LeafNode;
 class Node;
 
-
 /// Main class providing the API for the B+ Tree
 class BPlusTree {
-public:
+  public:
     /// Sole constructor.  Accepts an optional order for the B+ Tree.
     /// The default order will provide a reasonable demonstration of the
     /// data structure and its operations.
@@ -69,15 +68,20 @@ public:
     /// This B+ tree treats each such input as both a new value and the key
     /// under which to store it.
     void readInputFromFile(std::string aFileName);
-private:
+
+  private:
     void startNewTree(KeyType aKey, ValueType aValue);
     void insertIntoLeaf(KeyType aKey, ValueType aValue);
     void insertIntoParent(Node* aOldNode, KeyType aKey, Node* aNewNode);
-    template <typename T> T* split(T* aNode);
+    template <typename T>
+    T* split(T* aNode);
     void removeFromLeaf(KeyType aKey);
-    template <typename N> void coalesceOrRedistribute(N* aNode);
-    template <typename N> void coalesce(N* aNeighborNode, N* aNode, InternalNode* aParent, int aIndex);
-    template <typename N> void redistribute(N* aNeighborNode, N* aNode, InternalNode* aParent, int aIndex);
+    template <typename N>
+    void coalesceOrRedistribute(N* aNode);
+    template <typename N>
+    void coalesce(N* aNeighborNode, N* aNode, InternalNode* aParent, int aIndex);
+    template <typename N>
+    void redistribute(N* aNeighborNode, N* aNode, InternalNode* aParent, int aIndex);
     void adjustRoot();
     LeafNode* findLeafNode(KeyType aKey, bool aPrinting = false, bool aVerbose = false);
     void printValue(KeyType aKey, bool aPrintPath, bool aVerbose);
@@ -87,4 +91,4 @@ private:
     Printer fPrinter;
 };
 
-#endif //BPLUSTREE_H
+#endif  // BPLUSTREE_H

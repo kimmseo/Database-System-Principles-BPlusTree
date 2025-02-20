@@ -10,23 +10,12 @@ Node::Node(int aOrder, Node* aParent) : fOrder(aOrder), fParent(aParent) {}
 
 Node::~Node() {}
 
-int Node::order() const {
-    return fOrder;
-}
+int Node::order() const { return fOrder; }
 
-Node* Node::parent() const {
-    return fParent;
-}
+Node* Node::parent() const { return fParent; }
 
-void Node::setParent(Node* aParent) {
-    fParent = aParent;
-}
+void Node::setParent(Node* aParent) { fParent = aParent; }
 
-bool Node::isLeaf() const {
-    return !fParent;
-}
+bool Node::isLeaf() const { return !fParent; }
 
-bool Node::isRoot() const
-{
-    return !fParent;
-}
+bool Node::isRoot() const { return !fParent; }

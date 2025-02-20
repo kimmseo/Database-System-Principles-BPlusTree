@@ -22,41 +22,39 @@ std::string introMessage(int aOrder) {
 
 std::string usageMessage() {
     std::string message =
-    "Enter any of the following commands after the prompt > :\n"
-    "\ti <k>  -- Insert <k> (an integer, <k> >= 0) as both key and value).\n"
-    "\ti <k> <v> -- Insert (integer) value <v> under (integer) key <k> (<k> >= 0).\n"
-    "\tf <k>  -- Find the value under key <k>.\n"
-    "\tp <k> -- Print the path from the root to key k and its associated value.\n"
-    "\tr <k1> <k2> -- Print the keys and values found in the range [<k1>, <k2>]\n"
-    "\td <k>  -- Delete key <k> and its associated value.\n"
-    "\tx -- Destroy the whole tree.  Start again with an empty tree of the same order.\n"
-    "\tt -- Print the B+ tree.\n"
-    "\tl -- Print the keys of the leaves (bottom row of the tree).\n"
-    "\tv -- Toggle output of pointer addresses (\"verbose\") in tree and leaves.\n"
-    "\tq -- Quit. (Or use Ctl-D.)\n"
-    "\t? -- Print this help message.\n\n";
+        "Enter any of the following commands after the prompt > :\n"
+        "\ti <k>  -- Insert <k> (an integer, <k> >= 0) as both key and value).\n"
+        "\ti <k> <v> -- Insert (integer) value <v> under (integer) key <k> (<k> >= 0).\n"
+        "\tf <k>  -- Find the value under key <k>.\n"
+        "\tp <k> -- Print the path from the root to key k and its associated value.\n"
+        "\tr <k1> <k2> -- Print the keys and values found in the range [<k1>, <k2>]\n"
+        "\td <k>  -- Delete key <k> and its associated value.\n"
+        "\tx -- Destroy the whole tree.  Start again with an empty tree of the same order.\n"
+        "\tt -- Print the B+ tree.\n"
+        "\tl -- Print the keys of the leaves (bottom row of the tree).\n"
+        "\tv -- Toggle output of pointer addresses (\"verbose\") in tree and leaves.\n"
+        "\tq -- Quit. (Or use Ctl-D.)\n"
+        "\t? -- Print this help message.\n\n";
     return message;
 }
 
-int getOrder(int argc, const char * argv[]) {
+int getOrder(int argc, const char* argv[]) {
     if (argc > 1) {
         int order = 0;
         std::istringstream iss(argv[1]);
-        if ((iss >> order) && iss.eof() &&
-            order >= MIN_ORDER && order <= MAX_ORDER) {
+        if ((iss >> order) && iss.eof() && order >= MIN_ORDER && order <= MAX_ORDER) {
             return order;
         } else {
-            std::cerr << "Invalid order specification: "
-            << argv[1] << std::endl;
+            std::cerr << "Invalid order specification: " << argv[1] << std::endl;
             std::cerr << "Order must be an integer such that " << MIN_ORDER
-            << " <= <order> <= " << MAX_ORDER << std::endl;
+                      << " <= <order> <= " << MAX_ORDER << std::endl;
             std::cerr << "Proceeding with order " << DEFAULT_ORDER << std::endl;
         }
     }
     return DEFAULT_ORDER;
 }
 
-int main(int argc, const char * argv[]) {
+int main(int argc, const char* argv[]) {
     char instruction;
     int key = 0;
     bool quit = false;
@@ -70,8 +68,7 @@ int main(int argc, const char * argv[]) {
         std::cout << "Input from file " << argv[2] << ":" << std::endl;
         tree.print();
     }
-    while (!quit)
-    {
+    while (!quit) {
         std::cout << "> ";
         std::cin >> instruction;
         switch (instruction) {
@@ -80,23 +77,22 @@ int main(int argc, const char * argv[]) {
                 tree.remove(key);
                 tree.print(verbose);
                 break;
-            case 'i':
-                {
-                    char buffer[BUFFER_SIZE];
-                    int value = 0;
-                    std::cin.getline(buffer, BUFFER_SIZE);
-                    int count = sscanf(buffer, "%d %d", &key, &value);
-                    if (count == 1) {
-                        value = key;
-                    }
-                    // std::cin >> key;
-                    // if (key < 0) {
-                    // std::cout << usageMessage();
-                    // }
-                    tree.insert(key, value);
-                    tree.print(verbose);
-                    break;
+            case 'i': {
+                char buffer[BUFFER_SIZE];
+                int value = 0;
+                std::cin.getline(buffer, BUFFER_SIZE);
+                int count = sscanf(buffer, "%d %d", &key, &value);
+                if (count == 1) {
+                    value = key;
                 }
+                // std::cin >> key;
+                // if (key < 0) {
+                // std::cout << usageMessage();
+                // }
+                tree.insert(key, value);
+                tree.print(verbose);
+                break;
+            }
             case 'f':
                 std::cin >> key;
                 tree.printValue(key);
@@ -111,14 +107,13 @@ int main(int argc, const char * argv[]) {
             case 'q':
                 quit = true;
                 break;
-            case 'r':
-                {
-                    int key2;
-                    std::cin >> key;
-                    std::cin >> key2;
-                    tree.printRange(key, key2);
-                    break;
-                }
+            case 'r': {
+                int key2;
+                std::cin >> key;
+                std::cin >> key2;
+                tree.printRange(key, key2);
+                break;
+            }
             case 't':
                 tree.print(verbose);
                 break;

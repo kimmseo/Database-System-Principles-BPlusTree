@@ -11,7 +11,7 @@
 #include "Node.h"
 
 class InternalNode : public Node {
-public:
+  public:
     explicit InternalNode(int aOrder);
     explicit InternalNode(int aOrder, Node* aParent);
     ~InternalNode() override;
@@ -38,7 +38,8 @@ public:
     [[nodiscard]] std::string toString(bool aVerbose = false) const override;
     void queueUpChildren(std::queue<Node*>* aQueue);
     [[nodiscard]] const KeyType firstKey() const override;
-private:
+
+  private:
     Node* fLeftChild;
     void copyHalfFrom(std::vector<MappingType>& aMappings);
     void copyAllFrom(std::vector<MappingType>& aMappings);
@@ -47,4 +48,4 @@ private:
     std::vector<MappingType> fMappings;
 };
 
-#endif //INTERNALNODE_H
+#endif  // INTERNALNODE_H

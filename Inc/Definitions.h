@@ -21,4 +21,4 @@ using ValueType = int64_t;
 // Size of the buffer used to get the arguments (1 or 2)
 const int BUFFER_SIZE{256};
 
-#endif //DEFINITIONS_H
+#endif  // DEFINITIONS_H

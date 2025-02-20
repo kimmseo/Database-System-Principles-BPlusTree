@@ -9,13 +9,9 @@
 
 Record::Record(ValueType aValue) : fValue(aValue) {}
 
-ValueType Record::value() const {
-    return fValue;
-}
+ValueType Record::value() const { return fValue; }
 
-void Record::setValue(ValueType aValue) {
-    fValue = aValue;
-}
+void Record::setValue(ValueType aValue) { fValue = aValue; }
 
 std::string Record::toString() const {
     std::ostringstream oss;

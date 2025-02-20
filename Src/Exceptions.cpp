@@ -17,10 +17,8 @@ const char* LeafNotFoundException::what() const noexcept {
     return message.c_str();
 }
 
-
-NodeNotFoundException::NodeNotFoundException(std::string aSearchedNode,
-                                             std::string aContainingNode) :
-fSearchedNode{aSearchedNode}, fContainingNode{aContainingNode} {}
+NodeNotFoundException::NodeNotFoundException(std::string aSearchedNode, std::string aContainingNode)
+    : fSearchedNode{aSearchedNode}, fContainingNode{aContainingNode} {}
 
 const char* NodeNotFoundException::what() const noexcept {
     std::ostringstream ss;

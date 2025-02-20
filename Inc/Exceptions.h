@@ -10,30 +10,31 @@
 #include "Definitions.h"
 
 class LeafNotFoundException : public std::exception {
-public:
+  public:
     explicit LeafNotFoundException(KeyType);
     const char* what() const noexcept override;
-private:
+
+  private:
     KeyType fKey;
 };
 
-class NodeNotFoundException : public std::exception
-{
-public:
+class NodeNotFoundException : public std::exception {
+  public:
     explicit NodeNotFoundException(std::string, std::string);
     const char* what() const noexcept override;
-private:
+
+  private:
     std::string fSearchedNode;
     std::string fContainingNode;
 };
 
-class RecordNotFoundException : public std::exception
-{
-public:
+class RecordNotFoundException : public std::exception {
+  public:
     explicit RecordNotFoundException(KeyType);
     const char* what() const noexcept override;
-private:
+
+  private:
     KeyType fKey;
 };
 
-#endif //EXCEPTIONS_H
+#endif  // EXCEPTIONS_H

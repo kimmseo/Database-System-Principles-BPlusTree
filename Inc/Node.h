@@ -13,7 +13,7 @@ const KeyType DUMMY_KEY{-1};
 
 // Abstract class
 class Node {
-public:
+  public:
     explicit Node(int aOrder);
     explicit Node(int aOrder, Node* aParent);
     virtual ~Node();
@@ -27,9 +27,10 @@ public:
     virtual int maxSize() const = 0;
     virtual std::string toString(bool aVerbose = false) const = 0;
     virtual const KeyType firstKey() const = 0;
-private:
+
+  private:
     const int fOrder;
     Node* fParent;
 };
 
-#endif //NODE_H
+#endif  // NODE_H
