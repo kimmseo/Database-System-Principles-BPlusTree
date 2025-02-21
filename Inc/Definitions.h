@@ -33,12 +33,19 @@ struct gameRecord {
     unsigned short REB_home;
     bool HOME_TEAM_WINS;
 
-    // Constructor
-    gameRecord(std::string date, int points_home, float final_goal_percent, float free_throw_percent,
-        float three_point_percent, int assists, int rebounds, bool home_team_wins)
-            : GAME_DATE_EST(std::move(date)), TEAM_ID_home(points_home), PTS_home(points_home),
-    FG_PCT_home(final_goal_percent), FT_PCT_home(free_throw_percent), FG3_PCT_home(three_point_percent),
-    AST_home(assists), REB_home(rebounds), HOME_TEAM_WINS(home_team_wins) {}
+    // Corrected Constructor
+    gameRecord(std::string date, unsigned int team_id_home, unsigned short points_home,
+               float final_goal_percent, float free_throw_percent, float three_point_percent,
+               unsigned short assists, unsigned short rebounds, bool home_team_wins)
+        : GAME_DATE_EST(std::move(date)),
+          TEAM_ID_home(team_id_home),
+          PTS_home(points_home),
+          FG_PCT_home(final_goal_percent),
+          FT_PCT_home(free_throw_percent),
+          FG3_PCT_home(three_point_percent),
+          AST_home(assists),
+          REB_home(rebounds),
+          HOME_TEAM_WINS(home_team_wins) {}
 };
 
 #endif  // DEFINITIONS_H
