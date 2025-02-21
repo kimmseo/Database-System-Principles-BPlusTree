@@ -24,13 +24,13 @@ const int BUFFER_SIZE{256};
 
 struct Record {
     std::string GAME_DATE_EST;
-    int TEAM_ID_home;
-    int PTS_home;
+    unsigned int TEAM_ID_home;
+    unsigned short PTS_home;
     float FG_PCT_home;
     float FT_PCT_home;
     float FG3_PCT_home;
-    int AST_home;
-    int REB_home;
+    unsigned short AST_home;
+    unsigned short REB_home;
     bool HOME_TEAM_WINS;
 
     // Constructor
