@@ -22,7 +22,7 @@ using ValueType = int64_t;
 // Size of the buffer used to get the arguments (1 or 2)
 const int BUFFER_SIZE{256};
 
-struct Record {
+struct gameRecord {
     std::string GAME_DATE_EST;
     unsigned int TEAM_ID_home;
     unsigned short PTS_home;
@@ -34,7 +34,7 @@ struct Record {
     bool HOME_TEAM_WINS;
 
     // Constructor
-    Record(std::string date, int points_home, float final_goal_percent, float free_throw_percent,
+    gameRecord(std::string date, int points_home, float final_goal_percent, float free_throw_percent,
         float three_point_percent, int assists, int rebounds, bool home_team_wins)
             : GAME_DATE_EST(std::move(date)), TEAM_ID_home(points_home), PTS_home(points_home),
     FG_PCT_home(final_goal_percent), FT_PCT_home(free_throw_percent), FG3_PCT_home(three_point_percent),
