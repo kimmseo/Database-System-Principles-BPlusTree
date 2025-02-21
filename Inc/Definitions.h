@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <utility>
 
 const int DEFAULT_ORDER{4};
 
@@ -20,5 +21,24 @@ using ValueType = int64_t;
 
 // Size of the buffer used to get the arguments (1 or 2)
 const int BUFFER_SIZE{256};
+
+struct Record {
+    std::string GAME_DATE_EST;
+    int TEAM_ID_home;
+    int PTS_home;
+    float FG_PCT_home;
+    float FT_PCT_home;
+    float FG3_PCT_home;
+    int AST_home;
+    int REB_home;
+    bool HOME_TEAM_WINS;
+
+    // Constructor
+    Record(std::string date, int points_home, float final_goal_percent, float free_throw_percent,
+        float three_point_percent, int assists, int rebounds, bool home_team_wins)
+            : GAME_DATE_EST(std::move(date)), TEAM_ID_home(points_home), PTS_home(points_home),
+    FG_PCT_home(final_goal_percent), FT_PCT_home(free_throw_percent), FG3_PCT_home(three_point_percent),
+    AST_home(assists), REB_home(rebounds), HOME_TEAM_WINS(home_team_wins) {}
+};
 
 #endif  // DEFINITIONS_H
