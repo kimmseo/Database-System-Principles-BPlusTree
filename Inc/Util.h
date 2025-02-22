@@ -7,7 +7,8 @@
 
 class Util {
   public:
-    static void parseDate(const std::string& date, int& day, int& month, int& year);
+    static uint32_t parseDate(const std::string& date);
+    static void unparseDate(uint32_t packedDate, int& day, int& month, int& year);
 };
 
 #endif
