@@ -281,3 +281,49 @@ std::vector<BPlusTree::EntryType> BPlusTree::range(KeyType aStart, KeyType aEnd)
     startLeaf->copyRangeUntil(aEnd, entries);
     return entries;
 }
+
+void BPlusTree::printTreeInfo() {
+    if (!fRoot) {
+        std::cout << "Empty tree.\n";
+        return;
+    }
+
+    std::queue<Node *> nodeQueue;
+    nodeQueue.push(fRoot);
+    int level = 0;
+    int totalNodes = 0;
+
+    while (!nodeQueue.empty()) {
+        int nodeCount = nodeQueue.size();
+        totalNodes += nodeCount;
+
+        for (int i = 0; i < nodeCount; ++i) {
+            Node *currentNode = nodeQueue.front();
+            nodeQueue.pop();
+
+            if (auto *internalNode = dynamic_cast<InternalNode *>(currentNode)) {
+                internalNode->queueUpChildren(&nodeQueue);
+            }
+            // Ignore for leaf node it has no children to queue.
+        }
+        ++level;
+    }
+
+    std::cout << "Total Levels: " << level << "\n";
+    std::cout << "Total Nodes: " << totalNodes << "\n";
+
+    std::cout << "Root Node Content:\n[Root] Keys: ";
+    if (!fRoot->isLeaf()) {
+        auto *rootInternal = static_cast<InternalNode *>(fRoot);
+        for (int i = 0; i < rootInternal->size(); ++i) {
+            std::cout << rootInternal->keyAt(i) << " ";
+        }
+    } else {
+        auto *rootLeaf = static_cast<LeafNode *>(fRoot);
+        while (rootLeaf) {
+            std::cout << rootLeaf->toString();
+            rootLeaf = rootLeaf->next();
+        }
+    }
+    std::cout << "" << std::endl;
+}

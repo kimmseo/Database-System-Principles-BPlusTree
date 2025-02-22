@@ -69,6 +69,11 @@ class BPlusTree {
     /// under which to store it.
     void readInputFromFile(std::string aFileName);
 
+    /// Print the levels and number of nodes of the tree.
+    /// Print the content of the root node
+    /// from aStart to aEnd, including both.
+    void printTreeInfo();
+
   private:
     void startNewTree(KeyType aKey, ValueType aValue);
     void insertIntoLeaf(KeyType aKey, ValueType aValue);

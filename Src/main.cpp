@@ -32,6 +32,7 @@ std::string usageMessage() {
         "\tx -- Destroy the whole tree.  Start again with an empty tree of the same order.\n"
         "\tt -- Print the B+ tree.\n"
         "\tl -- Print the keys of the leaves (bottom row of the tree).\n"
+        "\tm -- Print tree info (number of levels, number of nodes, root content).\n"
         "\tv -- Toggle output of pointer addresses (\"verbose\") in tree and leaves.\n"
         "\tq -- Quit. (Or use Ctl-D.)\n"
         "\t? -- Print this help message.\n\n";
@@ -124,6 +125,9 @@ int main(int argc, const char* argv[]) {
             case 'x':
                 tree.destroyTree();
                 tree.print();
+                break;
+            case 'm':
+                tree.printTreeInfo();
                 break;
             case '?':
                 std::cout << usageMessage();
