@@ -10,6 +10,7 @@
 #include "InternalNode.h"
 #include "LeafNode.h"
 #include "Node.h"
+#include "CSV.h"
 
 BPlusTree::BPlusTree(int aOrder) : fOrder{aOrder}, fRoot{nullptr} {}
 
@@ -326,4 +327,41 @@ void BPlusTree::printTreeInfo() {
         }
     }
     std::cout << "" << std::endl;
+}
+
+#include "CSV.h"
+#include <algorithm>
+
+void BPlusTree::bulkLoadFromCSV(const std::string& filename, int columnID, int columnIndex, int numberOfCharsToIndex) {
+    CSVDatabase database;
+
+    if (!readCSV(filename.c_str(), database, columnID, columnIndex, numberOfCharsToIndex)) {
+        std::cerr << "Error: Could not read the CSV file." << std::endl;
+        return;
+    }
+
+    std::vector<std::pair<KeyType, ValueType>> data;
+
+    for (const auto& row : database) {
+        if (row.size() < 2) {
+            std::cerr << "Invalid row: expecting at least two columns (key, value)." << std::endl;
+            continue;
+        }
+
+        try {
+            KeyType key = std::stoi(row[columnID]);
+            ValueType value = std::stoi(row[columnIndex]);
+            data.push_back({key, value});
+        } catch (const std::exception& e) {
+            std::cerr << "Error parsing row: " << e.what() << std::endl;
+        }
+    }
+
+    std::sort(data.begin(), data.end(), [](const std::pair<KeyType, ValueType>& a, const std::pair<KeyType, ValueType>& b) {
+        return a.first < b.first;
+    });
+
+    for (const auto& entry : data) {
+        insert(entry.first, entry.second);
+    }
 }

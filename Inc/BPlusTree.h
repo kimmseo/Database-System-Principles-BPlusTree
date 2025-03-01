@@ -94,6 +94,7 @@ class BPlusTree {
     const int fOrder;
     Node* fRoot;
     Printer fPrinter;
+    void bulkLoadFromCSV(const std::string& aFileName, int columnID, int columnIndex, int numberOfCharsToIndex);
 };
 
 #endif  // BPLUSTREE_H
