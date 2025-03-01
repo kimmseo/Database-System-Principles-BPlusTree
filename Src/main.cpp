@@ -64,6 +64,13 @@ int main(int argc, const char* argv[]) {
     std::cout << introMessage(order);
     std::cout << usageMessage();
     BPlusTree tree(order);
+    // Load data
+    std::string filename = "../Src/games.txt";
+    int columnID = 0;
+    int columnIndex = 3;
+    int numberOfCharsToIndex = 10;
+    tree.bulkLoadFromCSV("../Src/games.txt", 3);  // Column 3 (FG_PCT_home) as key
+    std::cout << "Loaded data from " << filename << " into B+ Tree." << std::endl;
     if (argc > 2) {
         tree.readInputFromFile(argv[2]);
         std::cout << "Input from file " << argv[2] << ":" << std::endl;
@@ -78,22 +85,6 @@ int main(int argc, const char* argv[]) {
                 tree.remove(key);
                 tree.print(verbose);
                 break;
-            case 'i': {
-                char buffer[BUFFER_SIZE];
-                int value = 0;
-                std::cin.getline(buffer, BUFFER_SIZE);
-                int count = sscanf(buffer, "%d %d", &key, &value);
-                if (count == 1) {
-                    value = key;
-                }
-                // std::cin >> key;
-                // if (key < 0) {
-                // std::cout << usageMessage();
-                // }
-                tree.insert(key, value);
-                tree.print(verbose);
-                break;
-            }
             case 'f':
                 std::cin >> key;
                 tree.printValue(key);

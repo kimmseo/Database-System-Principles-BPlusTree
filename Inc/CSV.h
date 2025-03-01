@@ -19,18 +19,18 @@ typedef CSVRow::const_iterator CSVRowIterator;
 typedef std::vector<CSVRow> CSVDatabase;
 typedef CSVDatabase::const_iterator CSVDatabaseIterator;
 
-bool readCSV(const char* filePath, CSVDatabase& database, int columnID,
-    int columnIndex, int numberOfCharsToIndex);
+bool readCSV(const char* filePath, CSVDatabase& database, int columnID, int columnIndex,
+             int numberOfCharsToIndex);
 void readCSV(std::istream& input, CSVDatabase& database, int columnID, int columnIndex,
              int numberOfCharsToIndex);
 
-inline bool readCSV(const char* filePath, CSVDatabase& database, int columnID,
-    int columnIndex, int numberOfCharsToIndex) {
+inline bool readCSV(const char* filePath, CSVDatabase& database, int columnID, int columnIndex,
+                    int numberOfCharsToIndex) {
     // Read the file path in filePath
     std::fstream file(filePath, std::ios::in);
     // Verify if valid file path
     if (!file.is_open()) {
-        std::cout<<"Function 'readCSV': " << filePath << " not found\n!";
+        std::cout << "Function 'readCSV': " << filePath << " not found\n!";
         return false;
     }
     // Read file data
@@ -99,4 +99,4 @@ inline void display(const CSVDatabase& database) {
     }
 }
 
-#endif //CSV_H
+#endif  // CSV_H
