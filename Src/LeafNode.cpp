@@ -121,6 +121,10 @@ int LeafNode::removeAndDeleteRecord(KeyType aKey) {
     if (removalPoint == end) {
         throw RecordNotFoundException(aKey);
     }
+    auto record = *removalPoint;
+    fMappings.erase(removalPoint);
+    delete record.second;
+    return static_cast<int>(fMappings.size());
 }
 
 const KeyType LeafNode::firstKey() const { return fMappings[0].first; }
