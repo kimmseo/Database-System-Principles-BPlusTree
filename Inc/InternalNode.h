@@ -38,15 +38,14 @@ class InternalNode : public Node {
     [[nodiscard]] std::string toString(bool aVerbose = false) const override;
     void queueUpChildren(std::queue<Node*>* aQueue);
     [[nodiscard]] const KeyType firstKey() const override;
-    std::vector<MappingType> fMappings;
-    Node* fLeftChild;
 
   private:
+    Node* fLeftChild;
     void copyHalfFrom(std::vector<MappingType>& aMappings);
     void copyAllFrom(std::vector<MappingType>& aMappings);
     void copyLastFrom(MappingType aPair);
     void copyFirstFrom(MappingType aPair, int aParentIndex);
-
+    std::vector<MappingType> fMappings;
 };
 
 #endif  // INTERNALNODE_H

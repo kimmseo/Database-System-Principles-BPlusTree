@@ -44,7 +44,6 @@ inline int safeStoi(const std::string& str) {
     }
 }
 
-
 struct gameRecord {
     std::string GAME_DATE_EST;
     unsigned int TEAM_ID_home;
@@ -56,7 +55,6 @@ struct gameRecord {
     unsigned short REB_home;
     bool HOME_TEAM_WINS;
 
-
     gameRecord()
         : GAME_DATE_EST(""),
           TEAM_ID_home(0),
@@ -67,7 +65,6 @@ struct gameRecord {
           AST_home(0),
           REB_home(0),
           HOME_TEAM_WINS(false) {}
-
 
     gameRecord(std::string date, std::string team_id_home, std::string points_home,
                std::string final_goal_percent, std::string free_throw_percent,
@@ -87,7 +84,6 @@ struct gameRecord {
 using KeyType = float;
 using ValueType = gameRecord;
 
-
 inline std::ostream& operator<<(std::ostream& os, const gameRecord& record) {
     os << "Game Date: " << record.GAME_DATE_EST << ", Team ID: " << record.TEAM_ID_home
        << ", PTS: " << record.PTS_home << ", FG%: " << record.FG_PCT_home
@@ -96,7 +92,6 @@ inline std::ostream& operator<<(std::ostream& os, const gameRecord& record) {
        << ", Home Win: " << (record.HOME_TEAM_WINS ? "Yes" : "No");
     return os;
 }
-
 
 inline bool operator<(const gameRecord& lhs, const gameRecord& rhs) {
     return lhs.FG_PCT_home < rhs.FG_PCT_home;  // Use FG_PCT_home as the sorting key

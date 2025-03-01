@@ -14,8 +14,6 @@ const KeyType DUMMY_KEY{-1};
 // Abstract class
 class Node {
   public:
-    static int globalNodeCounter;  // global counter for node IDs
-    int nodeID;                    // unique ID for this node
     explicit Node(int aOrder);
     explicit Node(int aOrder, Node* aParent);
     virtual ~Node();

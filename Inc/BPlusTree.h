@@ -74,11 +74,13 @@ class BPlusTree {
     /// from aStart to aEnd, including both.
     void printTreeInfo();
 
-    void saveToDisk(const std::string &filename);
-    void loadFromDisk(const std::string &filename);
+    void saveToDisk(const std::string& filename);
+    void loadFromDisk(const std::string& filename);
     // Bulk load data from a CSV file into the B+ tree.
     // The columnID is the column number to use as the key.
-    void bulkLoadFromCSV(const std::string& filename, int columnID);
+
+    double bulkLoadFromCSV(const std::string& filename, int keyColumn);
+    double normalInsertFromCSV(const std::string& filename, int keyColumn);
 
   private:
     void startNewTree(KeyType aKey, ValueType aValue);
@@ -100,6 +102,8 @@ class BPlusTree {
     const int fOrder;
     Node* fRoot;
     Printer fPrinter;
+    std::vector<std::pair<KeyType, ValueType>> loadDataForNormalInsert(const std::string& filename,
+                                                                       int keyColumn);
 };
 
 #endif  // BPLUSTREE_H

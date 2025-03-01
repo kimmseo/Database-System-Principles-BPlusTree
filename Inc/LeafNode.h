@@ -37,13 +37,13 @@ class LeafNode : public Node {
     void copyRangeUntil(KeyType aKey, std::vector<EntryType>& aVector);
     void copyRange(std::vector<EntryType>& aVector);
     [[nodiscard]] std::string toString(bool aVerbose = false) const override;
-    std::vector<MappingType> fMappings;
-    
+
   private:
     void copyHalfFrom(std::vector<MappingType>& aMappings);
     void copyAllFrom(std::vector<MappingType>& aMappings);
     void copyLastFrom(MappingType aPair);
     void copyFirstFrom(MappingType aPair, int aParentIndex);
+    std::vector<MappingType> fMappings;
     LeafNode* fNext;
 };
 
