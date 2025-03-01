@@ -74,6 +74,9 @@ class BPlusTree {
     /// from aStart to aEnd, including both.
     void printTreeInfo();
 
+    void saveToDisk(const std::string &filename);
+    void loadFromDisk(const std::string &filename);
+
   private:
     void startNewTree(KeyType aKey, ValueType aValue);
     void insertIntoLeaf(KeyType aKey, ValueType aValue);

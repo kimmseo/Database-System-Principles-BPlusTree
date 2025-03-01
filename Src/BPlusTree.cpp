@@ -16,6 +16,220 @@ BPlusTree::BPlusTree(int aOrder) : fOrder{aOrder}, fRoot{nullptr} {}
 
 bool BPlusTree::isEmpty() const { return !fRoot; }
 
+
+//function to save to Disk
+void BPlusTree::saveToDisk(const std::string &filename)
+{
+    if (!fRoot) {
+        std::cerr << "Tree is empty, nothing to save.\n";
+        return;
+    }
+
+    std::ofstream out(filename);
+    if (!out) {
+        std::cerr << "Cannot open " << filename << " for writing.\n";
+        return;
+    }
+
+    // Write the root node's ID first
+    out << fRoot->nodeID << "\n";
+
+    // BFS
+    std::queue<Node*> nodeQ;
+    nodeQ.push(fRoot);
+
+    while (!nodeQ.empty()) {
+        Node* current = nodeQ.front();
+        nodeQ.pop();
+
+        // 1) nodeID
+        out << current->nodeID << " ";
+
+        // 2) isLeaf? (1 or 0)
+        bool leaf = current->isLeaf();
+        out << (leaf ? 1 : 0) << " ";
+
+        // 3) size (# of keys)
+        int sz = current->size();
+        out << sz << " ";
+
+        if (leaf) {
+            // LeafNode
+            LeafNode* ln = static_cast<LeafNode*>(current);
+
+            // 4) Write the keys
+            for (int i = 0; i < ln->size(); i++) {
+                // We can read directly from ln->fMappings if we add a getter, or 
+                // do something like ln->keyAt(i) if you add that method.
+                // For now, let's do a quick hack:
+                KeyType key = ln->fMappings[i].first; // If you make fMappings public or add a getter
+                out << key << " ";
+            }
+
+            // 5) Write next leaf ID (or -1 if none)
+            LeafNode* nxt = ln->next();
+            out << (nxt ? nxt->nodeID : -1) << " ";
+
+        } else {
+            // InternalNode
+            InternalNode* in = static_cast<InternalNode*>(current);
+
+            // 4) Write the keys
+            for (int i = 0; i < sz; i++) {
+                KeyType key = in->keyAt(i);
+                out << key << " ";
+            }
+
+            // 5) Write child IDs: leftChild + each in fMappings
+            Node* leftChild = in->firstChild();
+            out << (leftChild ? leftChild->nodeID : -1) << " ";
+            if (leftChild) nodeQ.push(leftChild);
+
+            // For each (key, child) in fMappings
+            for (int i = 0; i < sz; i++) {
+                Node* child = in->neighbour(i+1);
+                out << (child ? child->nodeID : -1) << " ";
+                if (child) nodeQ.push(child);
+            }
+        }
+
+        out << "\n"; // end of this node's line
+    }
+
+    out.close();
+    std::cout << "B+ Tree saved to " << filename << std::endl;
+}
+
+void BPlusTree::loadFromDisk(const std::string &filename)
+{
+    std::ifstream in(filename);
+    if (!in) {
+        std::cerr << "Cannot open " << filename << " for reading.\n";
+        return;
+    }
+
+    int rootID;
+    in >> rootID;
+    if (!in) {
+        std::cerr << "File " << filename << " is empty or corrupt.\n";
+        return;
+    }
+
+    // Temporary struct to store each node's line
+    struct NodeDiskData {
+        int nodeID;
+        bool isLeaf;
+        int size;
+        std::vector<KeyType> keys;   // 'size' keys
+        int nextLeafID;             // only if leaf
+        std::vector<int> childIDs;  // left child + size children if internal
+    };
+
+    std::unordered_map<int, NodeDiskData> diskMap;
+
+    // Read each node line
+    while (!in.eof()) {
+        NodeDiskData nd;
+        if (!(in >> nd.nodeID)) break;  // no more lines
+        int leafInt;
+        in >> leafInt;
+        nd.isLeaf = (leafInt != 0);
+
+        in >> nd.size;
+        nd.keys.resize(nd.size);
+        for (int i = 0; i < nd.size; i++) {
+            in >> nd.keys[i];
+        }
+
+        if (nd.isLeaf) {
+            // For a leaf: read nextLeafID
+            in >> nd.nextLeafID;
+        } else {
+            // For an internal node: read leftChild + 'size' children => total of size+1
+            nd.childIDs.resize(nd.size + 1);
+            for (int i = 0; i < nd.size + 1; i++) {
+                in >> nd.childIDs[i];
+            }
+        }
+
+        diskMap[nd.nodeID] = nd;
+    }
+    in.close();
+
+    // Create fresh nodes in memory for each nodeID
+    std::unordered_map<int, Node*> nodePtrMap;
+    for (auto &pair : diskMap) {
+        const auto &nd = pair.second;
+        Node* node = nullptr;
+        if (nd.isLeaf) {
+            node = new LeafNode(fOrder);
+        } else {
+            node = new InternalNode(fOrder);
+        }
+        // If you want each Node to remember its nodeID:
+        //   node->nodeID = nd.nodeID;  // if you added 'nodeID' to Node
+        nodePtrMap[nd.nodeID] = node;
+    }
+
+    // Fill each node’s keys, link children
+    for (auto &pair : diskMap) {
+        const auto &nd = pair.second;
+        Node* node = nodePtrMap[nd.nodeID];
+
+        if (nd.isLeaf) {
+            // Leaf node
+            LeafNode* ln = static_cast<LeafNode*>(node);
+
+            // Insert each key with a dummy "value" = same as key
+            for (KeyType k : nd.keys) {
+                ln->createAndInsertRecord(k, k);
+            }
+            // Link next leaf if nextLeafID != -1
+            if (nd.nextLeafID >= 0) {
+                LeafNode* nxt = static_cast<LeafNode*>(nodePtrMap[nd.nextLeafID]);
+                ln->setNext(nxt);
+            }
+
+        } else {
+            // Internal node
+            InternalNode* inNode = static_cast<InternalNode*>(node);
+
+            // childIDs[0] is the left child
+            if (!nd.childIDs.empty()) {
+                int leftID = nd.childIDs[0];
+                if (leftID >= 0) {
+                    Node* leftChild = nodePtrMap[leftID];
+                    leftChild->setParent(inNode);
+
+                    // ***** CRUCIAL STEP: set the leftChild pointer *****
+                    inNode->fLeftChild = leftChild; 
+                    // (If fLeftChild is private, add a setter method or make it accessible.)
+                }
+
+                // For each key in nd.keys, the child is at childIDs[i+1]
+                for (int i = 0; i < nd.size; i++) {
+                    KeyType k = nd.keys[i];
+                    int childID = nd.childIDs[i + 1];
+                    Node* childPtr = (childID >= 0) ? nodePtrMap[childID] : nullptr;
+                    if (childPtr) {
+                        childPtr->setParent(inNode);
+                    }
+                    // Insert into fMappings: (key, childPtr)
+                    inNode->fMappings.push_back(std::make_pair(k, childPtr));
+                }
+            }
+        }
+    }
+
+    // The root is the node with ID == rootID
+    fRoot = nodePtrMap[rootID];
+    // Optionally: fRoot->setParent(nullptr);  // if you want the root to have no parent
+
+    std::cout << "B+ Tree loaded from " << filename 
+              << " with rootID=" << rootID << "\n";
+}
+
+
 // Insertion
 
 void BPlusTree::insert(KeyType aKey, ValueType aValue) {
@@ -223,6 +437,10 @@ void BPlusTree::printLeaves(bool aVerbose) {
 }
 
 void BPlusTree::destroyTree() {
+    if (!fRoot) {
+        return;
+    }
+
     if (fRoot->isLeaf()) {
         delete static_cast<LeafNode *>(fRoot);
     } else {

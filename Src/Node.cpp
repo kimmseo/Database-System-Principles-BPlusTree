@@ -4,9 +4,15 @@
 
 #include "Node.h"
 
-Node::Node(int aOrder) : fOrder(aOrder), fParent(nullptr) {}
+int Node::globalNodeCounter = 0; // initialize static counter
 
-Node::Node(int aOrder, Node* aParent) : fOrder(aOrder), fParent(aParent) {}
+Node::Node(int aOrder) : fOrder(aOrder), fParent(nullptr) {
+    nodeID = globalNodeCounter++;
+}
+
+Node::Node(int aOrder, Node* aParent) : fOrder(aOrder), fParent(aParent) {
+    nodeID = globalNodeCounter++;
+}
 
 Node::~Node() {}
 
