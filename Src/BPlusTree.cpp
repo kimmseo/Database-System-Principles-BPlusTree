@@ -58,14 +58,15 @@ void BPlusTree::insertIntoLeaf(KeyType aKey, ValueType aValue) {
         if (!newLeaf) {
             return;
         }
-
-        std::cout << "New leaf created: " << newLeaf << std::endl;
+        // Debug
+        // std::cout << "New leaf created: " << newLeaf << std::endl;
 
         newLeaf->setNext(leafNode->next());
         leafNode->setNext(newLeaf);
 
         KeyType newKey = newLeaf->firstKey();
-        std::cout << "New key for parent insertion: " << newKey << std::endl;
+        // Debug
+        // std::cout << "New key for parent insertion: " << newKey << std::endl;
 
         insertIntoParent(leafNode, newKey, newLeaf);
     }
@@ -208,10 +209,12 @@ LeafNode *BPlusTree::findLeafNode(KeyType aKey, bool aPrinting, bool aVerbose) {
         visitedNodes.insert(node);
 
         auto internalNode = static_cast<InternalNode *>(node);
-        std::cout << "Current internal node: " << internalNode->firstKey() << std::endl;
+        // Debug
+        // std::cout << "Current internal node: " << internalNode->firstKey() << std::endl;
 
         Node *nextNode = internalNode->lookup(aKey);
-        std::cout << "Next node: " << nextNode << std::endl;
+        // Debug
+        // std::cout << "Next node: " << nextNode << std::endl;
 
         if (nextNode == nullptr) {
             std::cerr << "ERROR: lookup() returned nullptr for key " << aKey << std::endl;
@@ -379,9 +382,6 @@ double BPlusTree::bulkLoadFromCSV(const std::string &filename, int keyColumn) {
 
     std::getline(file, line);  // Skip header
 
-    // Start timing bulk load
-    auto startBulk = std::chrono::high_resolution_clock::now();
-
     while (std::getline(file, line)) {
         std::stringstream ss(line);
         std::vector<std::string> row;
@@ -416,6 +416,8 @@ double BPlusTree::bulkLoadFromCSV(const std::string &filename, int keyColumn) {
 
     auto sortingEndTime = std::chrono::high_resolution_clock::now();
     std::cout << "Sorting completed. Inserting into B+ Tree...\n";
+    // Start timing bulk load
+    auto startBulk = std::chrono::high_resolution_clock::now();
 
     // Bulk Insert
     for (const auto &entry : data) {
@@ -428,14 +430,47 @@ double BPlusTree::bulkLoadFromCSV(const std::string &filename, int keyColumn) {
     return bulkLoadTime;  // Return bulk load time
 }
 
-double BPlusTree::normalInsert(const std::vector<std::pair<KeyType, ValueType>> &data) {
-    auto startNormalInsert = std::chrono::high_resolution_clock::now();
-
-    for (const auto &entry : data) {
-        insert(entry.first, entry.second);
+double BPlusTree::normalInsertFromCSV(const std::string &filename, int keyColumn) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Error: Could not open the CSV file: " << filename << std::endl;
+        return -1.0;
     }
 
+    std::vector<std::pair<KeyType, ValueType>> data;
+    std::string line;
+
+    std::getline(file, line);  // Skip header
+
+    auto startNormalInsert = std::chrono::high_resolution_clock::now();
+
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        std::vector<std::string> row;
+        std::string cell;
+
+        while (std::getline(ss, cell, '\t')) {
+            row.push_back(trim(cell));
+        }
+
+        if (row.size() != 9) {
+            std::cerr << "Invalid row: Expected 9 columns, found " << row.size() << " -> " << line
+                      << std::endl;
+            continue;
+        }
+
+        try {
+            KeyType key = safeStof(row[keyColumn]);
+            ValueType record(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7],
+                             row[8]);
+            insert(key, record);
+        } catch (const std::exception &e) {
+            std::cerr << "Error parsing row: " << e.what() << " -> " << line << std::endl;
+        }
+    }
+
+    file.close();
+
     auto endNormalInsert = std::chrono::high_resolution_clock::now();
-    return std::chrono::duration<double>(endNormalInsert - startNormalInsert)
-        .count();  // Return normal insert time
+    return std::chrono::duration<double>(endNormalInsert - startNormalInsert).count();
 }

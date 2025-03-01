@@ -121,6 +121,7 @@ int main(int argc, const char* argv[]) {
             }
             case 't':
                 tree.print(verbose);
+                normalTree.print(verbose);
                 break;
             case 'v':
                 verbose = !verbose;

@@ -139,7 +139,8 @@ void LeafNode::moveHalfTo(LeafNode *aRecipient) {
 
 void LeafNode::copyHalfFrom(std::vector<std::pair<KeyType, Record *>> &aMappings) {
     for (size_t i = minSize(); i < aMappings.size(); ++i) {
-        std::cout << "Copying key: " << aMappings[i].first << std::endl;  // Debug
+        // Debug
+        // std::cout << "Copying key: " << aMappings[i].first << std::endl;
         fMappings.push_back(aMappings[i]);
     }
 }
