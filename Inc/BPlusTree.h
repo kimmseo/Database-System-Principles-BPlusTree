@@ -76,6 +76,9 @@ class BPlusTree {
 
     void saveToDisk(const std::string &filename);
     void loadFromDisk(const std::string &filename);
+    // Bulk load data from a CSV file into the B+ tree.
+    // The columnID is the column number to use as the key.
+    void bulkLoadFromCSV(const std::string& filename, int columnID);
 
   private:
     void startNewTree(KeyType aKey, ValueType aValue);
@@ -97,7 +100,6 @@ class BPlusTree {
     const int fOrder;
     Node* fRoot;
     Printer fPrinter;
-    void bulkLoadFromCSV(const std::string& aFileName, int columnID, int columnIndex, int numberOfCharsToIndex);
 };
 
 #endif  // BPLUSTREE_H

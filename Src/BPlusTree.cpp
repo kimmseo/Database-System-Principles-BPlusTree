@@ -11,6 +11,11 @@
 #include "LeafNode.h"
 #include "Node.h"
 #include "CSV.h"
+#include <chrono>
+#include <unordered_set>
+#include <algorithm>
+#include <sstream>
+#include <vector>
 
 BPlusTree::BPlusTree(int aOrder) : fOrder{aOrder}, fRoot{nullptr} {}
 
@@ -390,7 +395,9 @@ LeafNode *BPlusTree::findLeafNode(KeyType aKey, bool aPrinting, bool aVerbose) {
         }
         return nullptr;
     }
+
     auto node = fRoot;
+
     if (aPrinting) {
         std::cout << "Root: ";
         if (fRoot->isLeaf()) {
@@ -400,30 +407,50 @@ LeafNode *BPlusTree::findLeafNode(KeyType aKey, bool aPrinting, bool aVerbose) {
         }
         std::cout << std::endl;
     }
+
+    // Added visited nodes tracking to detect infinite loops, since data is large and terminal may explode
+    std::unordered_set<Node *> visitedNodes;
+
     while (!node->isLeaf()) {
+        // Track if node visited.
+        if (visitedNodes.find(node) != visitedNodes.end()) {
+            std::cerr << "ERROR: Infinite loop detected in findLeafNode()! Node already visited: "
+                      << node << std::endl;
+            return nullptr;
+        }
+        visitedNodes.insert(node);
+
         auto internalNode = static_cast<InternalNode *>(node);
         std::cout << "Current internal node: " << internalNode->firstKey() << std::endl;
 
         Node *nextNode = internalNode->lookup(aKey);
         std::cout << "Next node: " << nextNode << std::endl;
 
-        if (nextNode == nullptr) {  // Check if lookup() returns nullptr
+        if (nextNode == nullptr) {
             std::cerr << "ERROR: lookup() returned nullptr for key " << aKey << std::endl;
             return nullptr;
         }
 
         node = nextNode;
     }
+
     return static_cast<LeafNode *>(node);
 }
 
 void BPlusTree::readInputFromFile(std::string aFileName) {
-    int key;
-    std::ifstream input(aFileName);
-    while (input) {
-        input >> key;
-        insert(key, key);
+    std::ifstream inputFile(aFileName);
+    if (!inputFile) {
+        std::cerr << "Error: Could not open file " << aFileName << std::endl;
+        return;
     }
+
+    float key;
+    while (inputFile >> key) {
+        gameRecord record;    // Create a default gameRecord
+        insert(key, record);  // Insert with a placeholder record
+    }
+
+    std::cout << "Loaded data from " << aFileName << " into B+ Tree." << std::endl;
 }
 
 void BPlusTree::print(bool aVerbose) {
@@ -550,36 +577,68 @@ void BPlusTree::printTreeInfo() {
 #include "CSV.h"
 #include <algorithm>
 
-void BPlusTree::bulkLoadFromCSV(const std::string& filename, int columnID, int columnIndex, int numberOfCharsToIndex) {
-    CSVDatabase database;
+std::string trim(const std::string &str) {
+    size_t first = str.find_first_not_of(" \t");
+    if (first == std::string::npos) return "";  // Empty string if all spaces
+    size_t last = str.find_last_not_of(" \t");
+    return str.substr(first, last - first + 1);
+}
 
-    if (!readCSV(filename.c_str(), database, columnID, columnIndex, numberOfCharsToIndex)) {
-        std::cerr << "Error: Could not read the CSV file." << std::endl;
+void BPlusTree::bulkLoadFromCSV(const std::string &filename, int keyColumn) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Error: Could not open the CSV file: " << filename << std::endl;
         return;
     }
 
     std::vector<std::pair<KeyType, ValueType>> data;
+    std::string line;
 
-    for (const auto& row : database) {
-        if (row.size() < 2) {
-            std::cerr << "Invalid row: expecting at least two columns (key, value)." << std::endl;
+    std::getline(file, line);
+
+    // Start timer
+    auto startTime = std::chrono::high_resolution_clock::now();
+
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        std::vector<std::string> row;
+        std::string cell;
+
+        while (std::getline(ss, cell, '\t')) {
+            row.push_back(trim(cell));  // Trim spaces around values
+        }
+
+        // Ensure 9 columns, skip if not since data invalid.
+        if (row.size() != 9) {
+            std::cerr << "Invalid row: Expected 9 columns, found " << row.size() << " -> "
+                      << line << std::endl;
             continue;
         }
 
         try {
-            KeyType key = std::stoi(row[columnID]);
-            ValueType value = std::stoi(row[columnIndex]);
-            data.push_back({key, value});
-        } catch (const std::exception& e) {
-            std::cerr << "Error parsing row: " << e.what() << std::endl;
+            KeyType key = safeStof(row[keyColumn]);  // Use FG_PCT_home as key
+
+            ValueType record(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7],
+                             row[8]);
+
+            data.emplace_back(key, record);
+        } catch (const std::exception &e) {
+            std::cerr << "Error parsing row: " << e.what() << " -> " << line << std::endl;
         }
     }
 
-    std::sort(data.begin(), data.end(), [](const std::pair<KeyType, ValueType>& a, const std::pair<KeyType, ValueType>& b) {
-        return a.first < b.first;
-    });
+    std::sort(data.begin(), data.end(),
+              [](const auto &a, const auto &b) { return a.first < b.first; });
 
-    for (const auto& entry : data) {
+    std::cout << "Sorting completed. Inserting into B+ Tree..." << std::endl;
+
+    // Insert Data into B+ Tree
+    for (const auto &entry : data) {
         insert(entry.first, entry.second);
     }
+
+    auto endTime = std::chrono::high_resolution_clock::now();
+    std::cout << "Successfully loaded " << data.size() << " rows into B+ Tree in "
+              << std::chrono::duration<double>(endTime - startTime).count() << " seconds."
+              << std::endl;
 }

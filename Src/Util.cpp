@@ -20,8 +20,8 @@ int Util::parseDate(const std::string& date) {
         // Bits: [15 bits (year)] [ 4 bits (month)] [5 bits (days)]
         int packedDate = 0;
         packedDate |= (static_cast<int>(year) << 9);  // Shift year to the left by 9 bits
-        packedDate |= (month << 5);                        // Shift month to the left by 5 bits
-        packedDate |= day;                                 // Store day in the lowest 5 bits
+        packedDate |= (month << 5);                   // Shift month to the left by 5 bits
+        packedDate |= day;                            // Store day in the lowest 5 bits
 
         return packedDate;
     } else {
