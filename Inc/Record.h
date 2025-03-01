@@ -15,7 +15,7 @@ class Record {
     std::string toString() const;
 
   private:
-    Record() : fValue(0) {}
+    Record() : fValue() {}
     ValueType fValue;
 };
 

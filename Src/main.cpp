@@ -27,17 +27,21 @@ std::string usageMessage() {
         "\ti <k> <v> -- Insert (integer) value <v> under (integer) key <k> (<k> >= 0).\n"
         "\tf <k>  -- Find the value under key <k>.\n"
         "\tp <k> -- Print the path from the root to key k and its associated value.\n"
-        "\tr <k1> <k2> -- Print the keys and values found in the range [<k1>, <k2>]\n"
+        "\tr <k1> <k2> -- Print the keys and values found in the range [<k1>, <k2>].\n"
         "\td <k>  -- Delete key <k> and its associated value.\n"
-        "\tx -- Destroy the whole tree.  Start again with an empty tree of the same order.\n"
-        "\tt -- Print the B+ tree.\n"
+        "\tx -- Destroy the whole tree. Start again with an empty tree of the same order.\n"
+        "\tt -- Print the entire B+ tree.\n"
         "\tl -- Print the keys of the leaves (bottom row of the tree).\n"
         "\tm -- Print tree info (number of levels, number of nodes, root content).\n"
         "\tv -- Toggle output of pointer addresses (\"verbose\") in tree and leaves.\n"
-        "\tq -- Quit. (Or use Ctl-D.)\n"
+        "\tS <filename> -- Save the current B+ tree structure to <filename>.\n"
+        "\tL <filename> -- Load a B+ tree structure from <filename>.\n"
+        "\tq -- Quit. (Or use Ctrl-D.)\n"
         "\t? -- Print this help message.\n\n";
+
     return message;
 }
+
 
 int getOrder(int argc, const char* argv[]) {
     if (argc > 1) {
@@ -64,6 +68,13 @@ int main(int argc, const char* argv[]) {
     std::cout << introMessage(order);
     std::cout << usageMessage();
     BPlusTree tree(order);
+    // Load data
+    std::string filename = "../Src/games.txt";
+    int columnID = 0;
+    int columnIndex = 3;
+    int numberOfCharsToIndex = 10;
+    tree.bulkLoadFromCSV("../Src/games.txt", 3);  // Column 3 (FG_PCT_home) as key
+    std::cout << "Loaded data from " << filename << " into B+ Tree." << std::endl;
     if (argc > 2) {
         tree.readInputFromFile(argv[2]);
         std::cout << "Input from file " << argv[2] << ":" << std::endl;
@@ -78,22 +89,6 @@ int main(int argc, const char* argv[]) {
                 tree.remove(key);
                 tree.print(verbose);
                 break;
-            case 'i': {
-                char buffer[BUFFER_SIZE];
-                int value = 0;
-                std::cin.getline(buffer, BUFFER_SIZE);
-                int count = sscanf(buffer, "%d %d", &key, &value);
-                if (count == 1) {
-                    value = key;
-                }
-                // std::cin >> key;
-                // if (key < 0) {
-                // std::cout << usageMessage();
-                // }
-                tree.insert(key, value);
-                tree.print(verbose);
-                break;
-            }
             case 'f':
                 std::cin >> key;
                 tree.printValue(key);
@@ -132,6 +127,23 @@ int main(int argc, const char* argv[]) {
             case '?':
                 std::cout << usageMessage();
                 break;
+            case 'S': {
+                // Save
+                std::string filename;
+                std::cin >> filename; // read the filename from the user
+                tree.saveToDisk(filename);
+                break;
+            }
+            case 'L': {
+                // Load
+                std::string filename;
+                std::cin >> filename; // read the filename
+                tree.destroyTree();   // optional: clear existing in-memory tree
+                tree.loadFromDisk(filename);
+                // maybe print or do something
+                tree.print(verbose);
+                break;
+            }
             default:
                 std::cin.ignore(256, '\n');
                 std::cout << usageMessage();

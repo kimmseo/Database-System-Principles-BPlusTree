@@ -13,7 +13,8 @@ file(GLOB_RECURSE SRC_FILES "${SRC_DIR}/*.cpp")
 
 include_directories(${INC_DIR})
 
-add_executable(Database_System_Principles_Project_1 ${SRC_FILES})
+add_executable(Database_System_Principles_Project_1 ${SRC_FILES}
+        Inc/CSV.h)
 
 # Clang-format custom target
 find_program(CLANG_FORMAT NAMES clang-format)
