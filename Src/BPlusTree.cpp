@@ -44,6 +44,13 @@ void BPlusTree::insertIntoLeaf(KeyType aKey, ValueType aValue) {
         throw LeafNotFoundException(aKey);
     }
 
+    std::vector<ValueType *> &record = leafNode->lookup(aKey);
+
+    if (!record.empty()) {
+        record.push_back(new ValueType(aValue));
+        return;
+    }
+
     int newSize = leafNode->createAndInsertRecord(aKey, aValue);
 
     if (newSize > leafNode->maxSize()) {
@@ -105,9 +112,11 @@ void BPlusTree::removeFromLeaf(KeyType aKey) {
     if (!leafNode) {
         return;
     }
-    if (!leafNode->lookup(aKey)) {
+    std::vector<ValueType *> &record = leafNode->lookup(aKey);
+    if (record.empty()) {
         return;
     }
+
     int newSize = leafNode->removeAndDeleteRecord(aKey);
     if (newSize < leafNode->minSize()) {
         coalesceOrRedistribute(leafNode);
@@ -263,20 +272,27 @@ void BPlusTree::printValue(KeyType aKey, bool aPrintPath, bool aVerbose) {
         std::cout << "Leaf not found with key " << aKey << "." << std::endl;
         return;
     }
+
     if (aPrintPath) {
         std::cout << "\t";
     }
     std::cout << "Leaf: " << leaf->toString(aVerbose) << std::endl;
-    gameRecord *record = leaf->lookup(aKey);
-    if (!record) {
+
+    std::vector<ValueType *> &record = leaf->lookup(aKey);
+    if (record.empty()) {
         std::cout << "Record not found with key " << aKey << "." << std::endl;
         return;
     }
+
     if (aPrintPath) {
         std::cout << "\t";
     }
-    std::cout << "Record found at location " << std::hex << record << std::dec << ":" << std::endl;
-    std::cout << "\tKey: " << aKey << "   Value: " << record << std::endl;
+
+    std::cout << "Records found at location " << std::hex << &record << std::dec << ":"
+              << std::endl;
+    for (const auto *valuePtr : record) {
+        std::cout << "\tKey: " << aKey << "   Value: " << *valuePtr << std::endl;
+    }
 }
 
 void BPlusTree::printPathTo(KeyType aKey, bool aVerbose) { printValue(aKey, true, aVerbose); }
@@ -293,19 +309,26 @@ void BPlusTree::printRange(KeyType aStart, KeyType aEnd) {
 std::vector<BPlusTree::EntryType> BPlusTree::range(KeyType aStart, KeyType aEnd) {
     auto startLeaf = findLeafNode(aStart);
     auto endLeaf = findLeafNode(aEnd);
+
+    if (!startLeaf || !endLeaf) {  // cannot find
+        return {};
+    }
+
     std::vector<std::tuple<KeyType, ValueType, LeafNode *>> entries;
-    if (!startLeaf || !endLeaf) {
+
+    if (startLeaf == endLeaf) {
+        startLeaf->copyRange(aStart, aEnd, entries);
         return entries;
     }
+
     startLeaf->copyRangeStartingFrom(aStart, entries);
     startLeaf = startLeaf->next();
-    while (startLeaf != endLeaf) {
-        //std::cout<<"debug check\n";
-        startLeaf->copyRange(entries);
-        if (startLeaf->next() == nullptr) { break; }
+
+    while (startLeaf && startLeaf != endLeaf) {
+        startLeaf->copyFullRange(entries);
         startLeaf = startLeaf->next();
     }
-    //std::cout<<"while loop outside, debugging\n";
+
     startLeaf->copyRangeUntil(aEnd, entries);
     return entries;
 }
@@ -433,14 +456,27 @@ double BPlusTree::bulkLoadFromCSV(const std::string &filename, int keyColumn) {
             prevLeaf = currentLeaf;
             currentLeaf = newLeaf;
         }
-        leafMappings.emplace_back(entry.first, new gameRecord(entry.second));
+        auto it = std::find_if(
+            leafMappings.begin(), leafMappings.end(),
+            [&](const LeafNode::MappingType &mapping) { return mapping.first == entry.first; });
+
+        if (it != leafMappings.end()) {
+            it->second.push_back(new gameRecord(entry.second));
+        } else {
+            leafMappings.emplace_back(entry.first,
+                                      std::vector<ValueType *>{new gameRecord(entry.second)});
+        }
     }
 
     // Insert remaining keys
     if (!leafMappings.empty()) {
         if (leafMappings.size() <= currentLeaf->minSize()) {
             while (!leafMappings.empty()) {
-                prevLeaf->insert(leafMappings.front().first, leafMappings.front().second);
+                KeyType key = leafMappings.front().first;
+                std::vector<ValueType *> values = leafMappings.front().second;
+                for (ValueType *value : values) {
+                    prevLeaf->insert(key, value);
+                }
                 leafMappings.erase(leafMappings.begin());
 
                 if (prevLeaf->size() > prevLeaf->maxSize()) {

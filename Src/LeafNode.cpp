@@ -13,8 +13,10 @@ LeafNode::LeafNode(int aOrder) : fNext(nullptr), Node(aOrder) {}
 LeafNode::LeafNode(int aOrder, Node *aParent) : fNext(nullptr), Node(aOrder, aParent) {}
 
 LeafNode::~LeafNode() {
-    for (auto mapping : fMappings) {
-        delete mapping.second;
+    for (auto &mapping : fMappings) {
+        for (ValueType *valuePtr : mapping.second) {
+            delete valuePtr;
+        }
     }
 }
 
@@ -67,64 +69,119 @@ void LeafNode::insert(KeyType aKey, gameRecord *aRecord) {
     while (insertionPoint != end && insertionPoint->first < aKey) {
         ++insertionPoint;
     }
-    fMappings.insert(insertionPoint, MappingType(aKey, aRecord));
+
+    if (insertionPoint != end && insertionPoint->first == aKey) {
+        insertionPoint->second.push_back(aRecord);
+    } else {
+        fMappings.insert(insertionPoint, MappingType(aKey, {aRecord}));
+    }
 }
 
 void LeafNode::bulkInsert(const std::vector<MappingType> &sortedMappings) {
     fMappings = sortedMappings;
 }
 
-gameRecord *LeafNode::lookup(KeyType aKey) const {
-    for (auto mapping : fMappings) {
+std::vector<ValueType *> &LeafNode::lookup(KeyType aKey) {
+    for (auto &mapping : fMappings) {
         if (mapping.first == aKey) {
             return mapping.second;
         }
     }
-    return nullptr;
+
+    static std::vector<ValueType *> emptyVector;
+    return emptyVector;
 }
 
 void LeafNode::copyRangeStartingFrom(KeyType aKey, std::vector<EntryType> &aVector) {
-    bool found = false;
-    for (auto mapping : fMappings) {
-        if (mapping.first == aKey) {
-            found = true;
+    // Debug
+    //  std::cout << "Debug: Available keys in this leaf: ";
+    //  for (const auto &mapping : fMappings) {
+    //      std::cout << mapping.first << " ";
+    //  }
+    //  std::cout << std::endl;
+
+    bool startCopying = false;
+
+    for (const auto &mapping : fMappings) {
+        KeyType key = mapping.first;
+
+        if (!startCopying && key >= aKey) {
+            startCopying = true;  // Start copying once reach the first valid key
         }
-        if (found) {
-            aVector.push_back(std::make_tuple(mapping.first, *mapping.second, this));
+        if (startCopying) {
+            for (ValueType *valuePtr : mapping.second) {
+                aVector.push_back(std::make_tuple(key, *valuePtr, this));
+            }
         }
     }
 }
 
 void LeafNode::copyRangeUntil(KeyType aKey, std::vector<EntryType> &aVector) {
-    bool found = false;
-    for (auto mapping : fMappings) {
-        if (!found) {
-            aVector.push_back(std::make_tuple(mapping.first, *mapping.second, this));
+    // Debug
+    //  std::cout << "Debug: Available keys in this leaf: ";
+    //  for (const auto &mapping : fMappings) {
+    //      std::cout << mapping.first << " ";
+    //  }
+    //  std::cout << std::endl;
+
+    bool startCopying = false;
+
+    for (const auto &mapping : fMappings) {
+        KeyType key = mapping.first;
+
+        if (!startCopying && key <= aKey) {
+            startCopying = true;
         }
-        if (mapping.first == aKey) {
-            found = true;
+        if (!startCopying) continue;
+
+        if (key > aKey) {
+            break;
+        }
+        for (ValueType *valuePtr : mapping.second) {
+            aVector.push_back(std::make_tuple(key, *valuePtr, this));
         }
     }
 }
 
-void LeafNode::copyRange(std::vector<EntryType> &aVector) {
+void LeafNode::copyFullRange(std::vector<EntryType> &aVector) {
     for (auto mapping : fMappings) {
-        aVector.push_back(std::make_tuple(mapping.first, *mapping.second, this));
+        for (ValueType *valuePtr : mapping.second) {
+            aVector.push_back(std::make_tuple(mapping.first, *valuePtr, this));
+        }
+    }
+}
+
+void LeafNode::copyRange(KeyType aStart, KeyType aEnd, std::vector<EntryType> &aVector) {
+    for (const auto &mapping : fMappings) {
+        KeyType key = mapping.first;
+
+        if (key < aStart) continue;  // Ignore keys smaller than aStart
+        if (key > aEnd) {            // Stop copying if key is larger than aEnd
+            break;
+        }
+        for (ValueType *valuePtr : mapping.second) {
+            aVector.push_back(std::make_tuple(key, *valuePtr, this));
+        }
     }
 }
 
 int LeafNode::removeAndDeleteRecord(KeyType aKey) {
     auto removalPoint = fMappings.begin();
     auto end = fMappings.end();
+
     while (removalPoint != end && removalPoint->first != aKey) {
         ++removalPoint;
     }
+
     if (removalPoint == end) {
         throw RecordNotFoundException(aKey);
     }
-    auto record = *removalPoint;
+
+    for (ValueType *valuePtr : removalPoint->second) {
+        delete valuePtr;
+    }
+
     fMappings.erase(removalPoint);
-    delete record.second;
     return static_cast<int>(fMappings.size());
 }
 
@@ -138,11 +195,13 @@ void LeafNode::moveHalfTo(LeafNode *aRecipient) {
     }
 }
 
-void LeafNode::copyHalfFrom(std::vector<std::pair<KeyType, gameRecord *>> &aMappings) {
+void LeafNode::copyHalfFrom(std::vector<std::pair<KeyType, std::vector<gameRecord *>>> &aMappings) {
     for (size_t i = minSize(); i < aMappings.size(); ++i) {
-        // Debug
-        // std::cout << "Copying key: " << aMappings[i].first << std::endl;
-        fMappings.push_back(aMappings[i]);
+        std::vector<gameRecord *> copiedValues;
+        for (gameRecord *record : aMappings[i].second) {
+            copiedValues.push_back(new gameRecord(*record));
+        }
+        fMappings.emplace_back(aMappings[i].first, copiedValues);
     }
 }
 
@@ -152,9 +211,13 @@ void LeafNode::moveAllTo(LeafNode *aRecipient, int) {
     aRecipient->setNext(next());
 }
 
-void LeafNode::copyAllFrom(std::vector<std::pair<KeyType, gameRecord *>> &aMappings) {
-    for (auto mapping : aMappings) {
-        fMappings.push_back(mapping);
+void LeafNode::copyAllFrom(std::vector<std::pair<KeyType, std::vector<gameRecord *>>> &aMappings) {
+    for (const auto &mapping : aMappings) {
+        std::vector<gameRecord *> copiedValues;
+        for (gameRecord *record : mapping.second) {
+            copiedValues.push_back(new gameRecord(*record));
+        }
+        fMappings.emplace_back(mapping.first, copiedValues);
     }
 }
 

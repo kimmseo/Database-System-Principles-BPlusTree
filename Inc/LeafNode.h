@@ -15,7 +15,7 @@ class LeafNode : public Node {
     explicit LeafNode(int aOrder);
     explicit LeafNode(int aOrder, Node* aParent);
     ~LeafNode() override;
-    using MappingType = std::pair<KeyType, gameRecord*>;
+    using MappingType = std::pair<KeyType, std::vector<ValueType*>>;
     using EntryType = std::tuple<KeyType, ValueType, LeafNode*>;
     [[nodiscard]] bool isLeaf() const override;
     [[nodiscard]] LeafNode* next() const;
@@ -26,7 +26,7 @@ class LeafNode : public Node {
     int createAndInsertRecord(KeyType aKey, ValueType aValue);
     void insert(KeyType aKey, gameRecord* aRecord);
     void bulkInsert(const std::vector<MappingType>& sortedMappings);
-    gameRecord* lookup(KeyType aKey) const;
+    std::vector<ValueType*>& lookup(KeyType aKey);
     int removeAndDeleteRecord(KeyType aKey);
     [[nodiscard]] const KeyType firstKey() const override;
     void moveHalfTo(LeafNode* aRecipient);
@@ -35,7 +35,8 @@ class LeafNode : public Node {
     void moveLastToFrontOf(LeafNode* aRecipient, int aParentIndex);
     void copyRangeStartingFrom(KeyType aKey, std::vector<EntryType>& aVector);
     void copyRangeUntil(KeyType aKey, std::vector<EntryType>& aVector);
-    void copyRange(std::vector<EntryType>& aVector);
+    void copyRange(KeyType aStart, KeyType aEnd, std::vector<EntryType>& aVector);
+    void copyFullRange(std::vector<EntryType>& aVector);
     [[nodiscard]] std::string toString(bool aVerbose = false) const override;
 
   private:
