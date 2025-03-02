@@ -57,7 +57,7 @@ int getOrder(int argc, const char* argv[]) {
 
 int main(int argc, const char* argv[]) {
     char instruction;
-    int key = 0;
+    double key = 0;
     bool quit = false;
     bool verbose = false;
     int order = getOrder(argc, argv);
@@ -126,9 +126,10 @@ int main(int argc, const char* argv[]) {
                 quit = true;
                 break;
             case 'r': {
-                int key2;
+                double key2;
                 std::cin >> key;
                 std::cin >> key2;
+                std::cout << "\nDebug: Received key range: " << key << " to " << key2 << std::endl;
                 std::cout << "\n--- Bulk ---\n";
                 tree.printRange(key, key2);
                 std::cout << "\n--- Normal ---\n";
