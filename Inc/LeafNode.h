@@ -9,14 +9,13 @@
 #include <utility>
 #include <vector>
 #include "Node.h"
-#include "Record.h"
 
 class LeafNode : public Node {
   public:
     explicit LeafNode(int aOrder);
     explicit LeafNode(int aOrder, Node* aParent);
     ~LeafNode() override;
-    using MappingType = std::pair<KeyType, Record*>;
+    using MappingType = std::pair<KeyType, gameRecord*>;
     using EntryType = std::tuple<KeyType, ValueType, LeafNode*>;
     [[nodiscard]] bool isLeaf() const override;
     [[nodiscard]] LeafNode* next() const;
@@ -25,9 +24,9 @@ class LeafNode : public Node {
     [[nodiscard]] int minSize() const override;
     [[nodiscard]] int maxSize() const override;
     int createAndInsertRecord(KeyType aKey, ValueType aValue);
-    void insert(KeyType aKey, Record* aRecord);
+    void insert(KeyType aKey, gameRecord* aRecord);
     void bulkInsert(const std::vector<MappingType>& sortedMappings);
-    Record* lookup(KeyType aKey) const;
+    gameRecord* lookup(KeyType aKey) const;
     int removeAndDeleteRecord(KeyType aKey);
     [[nodiscard]] const KeyType firstKey() const override;
     void moveHalfTo(LeafNode* aRecipient);

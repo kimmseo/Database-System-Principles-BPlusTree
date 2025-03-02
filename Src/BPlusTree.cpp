@@ -267,7 +267,7 @@ void BPlusTree::printValue(KeyType aKey, bool aPrintPath, bool aVerbose) {
         std::cout << "\t";
     }
     std::cout << "Leaf: " << leaf->toString(aVerbose) << std::endl;
-    Record *record = leaf->lookup(aKey);
+    gameRecord *record = leaf->lookup(aKey);
     if (!record) {
         std::cout << "Record not found with key " << aKey << "." << std::endl;
         return;
@@ -276,7 +276,7 @@ void BPlusTree::printValue(KeyType aKey, bool aPrintPath, bool aVerbose) {
         std::cout << "\t";
     }
     std::cout << "Record found at location " << std::hex << record << std::dec << ":" << std::endl;
-    std::cout << "\tKey: " << aKey << "   Value: " << record->value() << std::endl;
+    std::cout << "\tKey: " << aKey << "   Value: " << record << std::endl;
 }
 
 void BPlusTree::printPathTo(KeyType aKey, bool aVerbose) { printValue(aKey, true, aVerbose); }
@@ -300,9 +300,12 @@ std::vector<BPlusTree::EntryType> BPlusTree::range(KeyType aStart, KeyType aEnd)
     startLeaf->copyRangeStartingFrom(aStart, entries);
     startLeaf = startLeaf->next();
     while (startLeaf != endLeaf) {
+        //std::cout<<"debug check\n";
         startLeaf->copyRange(entries);
+        if (startLeaf->next() == nullptr) { break; }
         startLeaf = startLeaf->next();
     }
+    //std::cout<<"while loop outside, debugging\n";
     startLeaf->copyRangeUntil(aEnd, entries);
     return entries;
 }
@@ -430,7 +433,7 @@ double BPlusTree::bulkLoadFromCSV(const std::string &filename, int keyColumn) {
             prevLeaf = currentLeaf;
             currentLeaf = newLeaf;
         }
-        leafMappings.emplace_back(entry.first, new Record(entry.second));
+        leafMappings.emplace_back(entry.first, new gameRecord(entry.second));
     }
 
     // Insert remaining keys
