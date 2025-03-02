@@ -95,19 +95,32 @@ int main(int argc, const char* argv[]) {
         switch (instruction) {
             case 'd':
                 std::cin >> key;
+                std::cout << "\n--- Bulk ---\n";
                 tree.remove(key);
                 tree.print(verbose);
+                std::cout << "\n--- Normal ---\n";
+                normalTree.remove(key);
+                normalTree.print(verbose);
                 break;
             case 'f':
                 std::cin >> key;
+                std::cout << "\n--- Bulk ---\n";
                 tree.printValue(key);
+                std::cout << "\n--- Normal ---\n";
+                normalTree.printValue(key);
                 break;
             case 'l':
+                std::cout << "\n--- Bulk ---\n";
                 tree.printLeaves(verbose);
+                std::cout << "\n--- Normal ---\n";
+                normalTree.printLeaves(verbose);
                 break;
             case 'p':
                 std::cin >> key;
+                std::cout << "\n--- Bulk ---\n";
                 tree.printPathTo(key, verbose);
+                std::cout << "\n--- Normal ---\n";
+                normalTree.printPathTo(key, verbose);
                 break;
             case 'q':
                 quit = true;
@@ -116,7 +129,10 @@ int main(int argc, const char* argv[]) {
                 int key2;
                 std::cin >> key;
                 std::cin >> key2;
+                std::cout << "\n--- Bulk ---\n";
                 tree.printRange(key, key2);
+                std::cout << "\n--- Normal ---\n";
+                normalTree.printRange(key, key2);
                 break;
             }
             case 't':
