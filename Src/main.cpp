@@ -67,7 +67,7 @@ int main(int argc, const char* argv[]) {
     // Load data
     std::string filename = "../Src/games.txt";
     int keyColumn = 3;  // Column 3 (FG_PCT_home) as key
-    tree.bulkLoadFromCSV("../Src/games.txt", keyColumn);
+    tree.bulkLoadFromCSV(filename, keyColumn);
     std::cout << "\n--- Bulk Loading ---\n";
     double bulkTime = tree.bulkLoadFromCSV(filename, keyColumn);
     std::cout << "Bulk Loading Time: " << bulkTime << " seconds.\n";
@@ -120,7 +120,9 @@ int main(int argc, const char* argv[]) {
                 break;
             }
             case 't':
+                std::cout << "\n--- Bulk ---\n";
                 tree.print(verbose);
+                std::cout << "\n--- Normal ---\n";
                 normalTree.print(verbose);
                 break;
             case 'v':
@@ -132,7 +134,10 @@ int main(int argc, const char* argv[]) {
                 tree.print();
                 break;
             case 'm':
+                std::cout << "\n--- Bulk ---\n";
                 tree.printTreeInfo();
+                std::cout << "\n--- Normal ---\n";
+                normalTree.printTreeInfo();
                 break;
             case '?':
                 std::cout << usageMessage();

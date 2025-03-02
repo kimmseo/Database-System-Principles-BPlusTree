@@ -26,6 +26,7 @@ class LeafNode : public Node {
     [[nodiscard]] int maxSize() const override;
     int createAndInsertRecord(KeyType aKey, ValueType aValue);
     void insert(KeyType aKey, Record* aRecord);
+    void bulkInsert(const std::vector<MappingType>& sortedMappings);
     Record* lookup(KeyType aKey) const;
     int removeAndDeleteRecord(KeyType aKey);
     [[nodiscard]] const KeyType firstKey() const override;

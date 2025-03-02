@@ -44,13 +44,6 @@ void BPlusTree::insertIntoLeaf(KeyType aKey, ValueType aValue) {
         throw LeafNotFoundException(aKey);
     }
 
-    Record *record = leafNode->lookup(aKey);
-    if (record) {
-        // aKey already exists
-        record->setValue(aValue);
-        return;
-    }
-
     int newSize = leafNode->createAndInsertRecord(aKey, aValue);
 
     if (newSize > leafNode->maxSize()) {
@@ -410,18 +403,63 @@ double BPlusTree::bulkLoadFromCSV(const std::string &filename, int keyColumn) {
 
     std::cout << "Finished reading " << data.size() << " records. Sorting now...\n";
 
-    // Sort Data before bulk loading
+    // Step 1: Sort Data before bulk loading
     std::sort(data.begin(), data.end(),
               [](const auto &a, const auto &b) { return a.first < b.first; });
 
     auto sortingEndTime = std::chrono::high_resolution_clock::now();
     std::cout << "Sorting completed. Inserting into B+ Tree...\n";
+
     // Start timing bulk load
     auto startBulk = std::chrono::high_resolution_clock::now();
 
-    // Bulk Insert
+    // Step 2: create leafnodes
+    std::vector<Node *> leafNodes;
+    LeafNode *currentLeaf = new LeafNode(fOrder);
+    LeafNode *prevLeaf;
+    std::vector<LeafNode::MappingType> leafMappings;
+
     for (const auto &entry : data) {
-        insert(entry.first, entry.second);
+        if (leafMappings.size() == currentLeaf->maxSize()) {
+            currentLeaf->bulkInsert(leafMappings);
+            leafNodes.push_back(currentLeaf);
+            leafMappings.clear();
+
+            LeafNode *newLeaf = new LeafNode(fOrder);
+            currentLeaf->setNext(newLeaf);
+            prevLeaf = currentLeaf;
+            currentLeaf = newLeaf;
+        }
+        leafMappings.emplace_back(entry.first, new Record(entry.second));
+    }
+
+    // Insert remaining keys
+    if (!leafMappings.empty()) {
+        if (leafMappings.size() <= currentLeaf->minSize()) {
+            while (!leafMappings.empty()) {
+                prevLeaf->insert(leafMappings.front().first, leafMappings.front().second);
+                leafMappings.erase(leafMappings.begin());
+
+                if (prevLeaf->size() > prevLeaf->maxSize()) {
+                    LeafNode *newNode = new LeafNode(fOrder);
+                    prevLeaf->moveHalfTo(newNode);
+                    prevLeaf->setNext(newNode);
+                    prevLeaf = newNode;  // Move to the new leaf
+                }
+            }
+            leafNodes.push_back(prevLeaf);
+        } else {
+            currentLeaf->bulkInsert(leafMappings);
+            leafNodes.push_back(currentLeaf);
+        }
+        leafMappings.clear();
+    }
+    fRoot = leafNodes[0];
+
+    // Step 3: Build Internal Nodes from LeafNodes
+    for (size_t i = 1; i < leafNodes.size(); i++) {
+        KeyType separatorKey = leafNodes[i]->firstKey();
+        insertIntoParent(leafNodes[i - 1], separatorKey, leafNodes[i]);
     }
 
     auto endBulk = std::chrono::high_resolution_clock::now();
