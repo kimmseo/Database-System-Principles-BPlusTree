@@ -56,11 +56,8 @@ std::string LeafNode::toString(bool aVerbose) const {
 }
 
 int LeafNode::createAndInsertRecord(KeyType aKey, ValueType aValue) {
-    Record *existingRecord = lookup(aKey);
-    if (!existingRecord) {
-        Record *newRecord = new Record(aValue);
-        insert(aKey, newRecord);
-    }
+    Record *newRecord = new Record(aValue);
+    insert(aKey, newRecord);
     return static_cast<int>(fMappings.size());
 }
 
@@ -71,6 +68,10 @@ void LeafNode::insert(KeyType aKey, Record *aRecord) {
         ++insertionPoint;
     }
     fMappings.insert(insertionPoint, MappingType(aKey, aRecord));
+}
+
+void LeafNode::bulkInsert(const std::vector<MappingType> &sortedMappings) {
+    fMappings = sortedMappings;
 }
 
 Record *LeafNode::lookup(KeyType aKey) const {

@@ -67,7 +67,7 @@ int main(int argc, const char* argv[]) {
     // Load data
     std::string filename = "../Src/games.txt";
     int keyColumn = 3;  // Column 3 (FG_PCT_home) as key
-    tree.bulkLoadFromCSV("../Src/games.txt", keyColumn);
+    tree.bulkLoadFromCSV(filename, keyColumn);
     std::cout << "\n--- Bulk Loading ---\n";
     double bulkTime = tree.bulkLoadFromCSV(filename, keyColumn);
     std::cout << "Bulk Loading Time: " << bulkTime << " seconds.\n";
@@ -95,19 +95,32 @@ int main(int argc, const char* argv[]) {
         switch (instruction) {
             case 'd':
                 std::cin >> key;
+                std::cout << "\n--- Bulk ---\n";
                 tree.remove(key);
                 tree.print(verbose);
+                std::cout << "\n--- Normal ---\n";
+                normalTree.remove(key);
+                normalTree.print(verbose);
                 break;
             case 'f':
                 std::cin >> key;
+                std::cout << "\n--- Bulk ---\n";
                 tree.printValue(key);
+                std::cout << "\n--- Normal ---\n";
+                normalTree.printValue(key);
                 break;
             case 'l':
+                std::cout << "\n--- Bulk ---\n";
                 tree.printLeaves(verbose);
+                std::cout << "\n--- Normal ---\n";
+                normalTree.printLeaves(verbose);
                 break;
             case 'p':
                 std::cin >> key;
+                std::cout << "\n--- Bulk ---\n";
                 tree.printPathTo(key, verbose);
+                std::cout << "\n--- Normal ---\n";
+                normalTree.printPathTo(key, verbose);
                 break;
             case 'q':
                 quit = true;
@@ -116,11 +129,16 @@ int main(int argc, const char* argv[]) {
                 int key2;
                 std::cin >> key;
                 std::cin >> key2;
+                std::cout << "\n--- Bulk ---\n";
                 tree.printRange(key, key2);
+                std::cout << "\n--- Normal ---\n";
+                normalTree.printRange(key, key2);
                 break;
             }
             case 't':
+                std::cout << "\n--- Bulk ---\n";
                 tree.print(verbose);
+                std::cout << "\n--- Normal ---\n";
                 normalTree.print(verbose);
                 break;
             case 'v':
@@ -132,7 +150,10 @@ int main(int argc, const char* argv[]) {
                 tree.print();
                 break;
             case 'm':
+                std::cout << "\n--- Bulk ---\n";
                 tree.printTreeInfo();
+                std::cout << "\n--- Normal ---\n";
+                normalTree.printTreeInfo();
                 break;
             case '?':
                 std::cout << usageMessage();
