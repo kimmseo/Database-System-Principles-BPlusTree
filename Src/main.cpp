@@ -78,6 +78,7 @@ int main(int argc, const char* argv[]) {
 
     std::cout << "\nChecking size of each record:\n";
     std::cout << "sizeof(gameRecord): " << sizeof(gameRecord) << std::endl;
+    std::cout << "sizeof(*gameRecord): " << sizeof(gameRecord*) << std::endl;
 
     // **Comparison**
     std::cout << "\n--- Comparison ---\n";

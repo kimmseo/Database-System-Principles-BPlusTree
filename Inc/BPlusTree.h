@@ -113,6 +113,7 @@ class BPlusTree {
     QueryStats rangeWithStats(KeyType aStart, KeyType aEnd);
     QueryStats rangeWithStatsV2(KeyType aStart, KeyType aEnd);
     QueryStats linearScan(KeyType aStart, KeyType aEnd);
+    unsigned int getNumberOfRecords(LeafNode* aLeaf);
 
     const int fOrder;
     Node* fRoot;

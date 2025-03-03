@@ -278,7 +278,8 @@ LeafNode *BPlusTree::findLeafNode(KeyType aKey, bool aPrinting, bool aVerbose) {
 
         node = nextNode;
     }
-
+    // Debug to check number of records in leaf node being inserted
+    // std::cout << "Number of records in leaf node: " << getNumberOfRecords(static_cast<LeafNode *>(node)) <<std::endl;
     return static_cast<LeafNode *>(node);
 }
 
@@ -346,6 +347,7 @@ void BPlusTree::printValue(KeyType aKey, bool aPrintPath, bool aVerbose) {
     for (const auto *valuePtr : record) {
         std::cout << "\tKey: " << aKey << "   Value: " << *valuePtr << std::endl;
     }
+    std::cout << "Number of records in the block: " << getNumberOfRecords(leaf) << std::endl;
 }
 
 void BPlusTree::printPathTo(KeyType aKey, bool aVerbose) { printValue(aKey, true, aVerbose); }
@@ -770,4 +772,8 @@ double BPlusTree::normalInsertFromCSV(const std::string &filename, int keyColumn
 
     auto endNormalInsert = std::chrono::high_resolution_clock::now();
     return std::chrono::duration<double>(endNormalInsert - startNormalInsert).count();
+}
+
+unsigned int BPlusTree::getNumberOfRecords(LeafNode *aLeaf) {
+    return aLeaf->getMappingsSize();
 }
