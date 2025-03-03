@@ -771,7 +771,3 @@ double BPlusTree::normalInsertFromCSV(const std::string &filename, int keyColumn
     auto endNormalInsert = std::chrono::high_resolution_clock::now();
     return std::chrono::duration<double>(endNormalInsert - startNormalInsert).count();
 }
-
-unsigned int BPlusTree::returnSizeOfLeafNode() const {
-    return sizeof(LeafNode);
-}
