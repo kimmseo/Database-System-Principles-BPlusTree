@@ -90,6 +90,7 @@ class BPlusTree {
 
     double bulkLoadFromCSV(const std::string& filename, int keyColumn);
     double normalInsertFromCSV(const std::string& filename, int keyColumn);
+    unsigned int returnSizeOfLeafNode() const;
 
   private:
     void startNewTree(KeyType aKey, ValueType aValue);

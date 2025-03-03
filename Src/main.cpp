@@ -77,6 +77,18 @@ int main(int argc, const char* argv[]) {
     double normalTime = normalTree.normalInsertFromCSV(filename, keyColumn);
     std::cout << "Normal Insertion Time: " << normalTime << " seconds.\n";
 
+    std::cout << "\nChecking size of records/nodes/tree:\n";
+    std::cout << "\n--- Bulk ---\n";
+    std::cout << "sizeof(LeafNode): " << tree.returnSizeOfLeafNode();
+    std::cout << "\n--- Normal ---\n";
+    std::cout << "sizeof(LeafNode): " << normalTree.returnSizeOfLeafNode();
+    std::cout << std::endl;
+    std::cout << "\nsizeof(gameRecord): " << sizeof(gameRecord) << std::endl;
+    //std::cout << "\n--- Bulk ---\n";
+    //std::cout << "sizeof(tree): " << sizeof(tree);
+    //std::cout << "\n--- Normal ---\n";
+    //std::cout << "sizeof(normalTree): " << sizeof(normalTree) << std::endl;
+
     // **Comparison**
     std::cout << "\n--- Comparison ---\n";
     std::cout << " - Bulk Loading Time: " << bulkTime << " sec\n";
