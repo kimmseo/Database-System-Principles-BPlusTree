@@ -59,7 +59,14 @@ std::string LeafNode::toString(bool aVerbose) const {
 
 std::vector<LeafNode::MappingType> LeafNode::getMappings() const { return fMappings; }
 
-unsigned int LeafNode::getMappingsSize() const { return fMappings.size(); }
+unsigned int LeafNode::getMappingsSize() const {
+    unsigned int totalCount = 0;
+    for (const auto& mapping : fMappings) {
+        const std::vector<ValueType*>& valueVector = mapping.second;
+        totalCount += valueVector.size();
+    }
+    return totalCount;
+}
 
 int LeafNode::createAndInsertRecord(KeyType aKey, ValueType aValue) {
     gameRecord *newRecord = new gameRecord(aValue);
