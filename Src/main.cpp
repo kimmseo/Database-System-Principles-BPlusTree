@@ -62,7 +62,6 @@ int main(int argc, const char* argv[]) {
     bool verbose = false;
     int order = getOrder(argc, argv);
     std::cout << introMessage(order);
-    std::cout << usageMessage();
     BPlusTree tree(order);
     // Load data
     std::string filename = "../Src/games.txt";
@@ -92,6 +91,9 @@ int main(int argc, const char* argv[]) {
         std::cout << "Input from file " << argv[2] << ":" << std::endl;
         tree.print();
     }
+
+    std::cout << std::endl;
+    std::cout << usageMessage();
     while (!quit) {
         std::cout << "> ";
         std::cin >> instruction;
