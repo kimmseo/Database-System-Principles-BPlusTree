@@ -417,7 +417,12 @@ double BPlusTree::bulkLoadFromCSV(const std::string &filename, int keyColumn) {
         }
 
         try {
-            KeyType key = safeStof(row[keyColumn]);
+            std::optional<float> keyOpt = safeStof(row[keyColumn]);
+            if (!keyOpt.has_value()) {
+                continue;  // Skip this row
+            }
+
+            KeyType key = keyOpt.value();  // Extract valid float value
             ValueType record(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7],
                              row[8]);
             data.emplace_back(key, record);
@@ -537,7 +542,12 @@ double BPlusTree::normalInsertFromCSV(const std::string &filename, int keyColumn
         }
 
         try {
-            KeyType key = safeStof(row[keyColumn]);
+            std::optional<float> keyOpt = safeStof(row[keyColumn]);
+            if (!keyOpt.has_value()) {
+                continue;  // Skip this row
+            }
+
+            KeyType key = keyOpt.value();  // Extract valid float value
             ValueType record(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7],
                              row[8]);
             insert(key, record);

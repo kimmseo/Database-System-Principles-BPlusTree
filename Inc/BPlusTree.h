@@ -81,7 +81,6 @@ class BPlusTree {
 
     double bulkLoadFromCSV(const std::string& filename, int keyColumn);
     double normalInsertFromCSV(const std::string& filename, int keyColumn);
-    double normalInsert(const std::vector<std::pair<KeyType, ValueType>>& data);
 
   private:
     void startNewTree(KeyType aKey, ValueType aValue);

@@ -160,25 +160,26 @@ void InternalNode::moveLastToFrontOf(InternalNode* aRecipient, int /*aParentInde
 }
 
 Node* InternalNode::lookup(KeyType aKey) const {
-    // If no real keys, go left
     if (fMappings.empty()) {
         return fLeftChild;
     }
 
-    // If aKey < the first real key, go left
-    if (aKey < fMappings[0].first) {
+    if (aKey < fMappings.front().first) {
         return fLeftChild;
     }
 
-    // Otherwise, find the correct child
-    for (size_t i = 1; i < fMappings.size(); i++) {
-        if (aKey < fMappings[i].first) {
-            // Child is the one at i-1
-            return fMappings[i - 1].second;
+    // use binary search
+    size_t left = 0, right = fMappings.size();
+    while (left < right) {
+        size_t mid = left + (right - left) / 2;
+        if (fMappings[mid].first <= aKey) {
+            left = mid + 1;
+        } else {
+            right = mid;
         }
     }
-    // If >= all keys, go to the rightmost child
-    return fMappings.back().second;
+
+    return (left > 0) ? fMappings[left - 1].second : fLeftChild;
 }
 
 int InternalNode::nodeIndex(Node* aNode) const {

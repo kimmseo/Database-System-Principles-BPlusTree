@@ -11,6 +11,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <optional>
 
 const int DEFAULT_ORDER{20};
 
@@ -22,14 +23,15 @@ const int MAX_ORDER{20};
 // Size of the buffer used to get the arguments (1 or 2)
 const int BUFFER_SIZE{256};
 
-inline float safeStof(const std::string& str) {
+inline std::optional<float> safeStof(const std::string& str) {
     try {
-        if (str.empty() || str == "NULL" || str == "N/A")
-            return 0.0f;  // Handle missing/invalid values
+        if (str.empty() || str == "NULL" || str == "N/A") {
+            return std::nullopt;  // indicate missing value
+        }
         return std::stof(str);
     } catch (const std::exception& e) {
         std::cerr << "Error converting to float: \"" << str << "\" (" << e.what() << ")\n";
-        return 0.0f;  // Return default value if conversion fails
+        return std::nullopt;  // Return missing value if conversion fails
     }
 }
 
@@ -73,9 +75,9 @@ struct gameRecord {
         : GAME_DATE_EST(std::move(date)),
           TEAM_ID_home(safeStoi(team_id_home)),
           PTS_home(static_cast<unsigned short>(safeStoi(points_home))),
-          FG_PCT_home(safeStof(final_goal_percent)),
-          FT_PCT_home(safeStof(free_throw_percent)),
-          FG3_PCT_home(safeStof(three_point_percent)),
+          FG_PCT_home(safeStof(final_goal_percent).value_or(0.0f)),  // Default to 0.0 if missing
+          FT_PCT_home(safeStof(free_throw_percent).value_or(0.0f)),
+          FG3_PCT_home(safeStof(three_point_percent).value_or(0.0f)),
           AST_home(static_cast<unsigned short>(safeStoi(assists))),
           REB_home(static_cast<unsigned short>(safeStoi(rebounds))),
           HOME_TEAM_WINS(safeStoi(home_team_wins) != 0) {}  // Convert int to bool
