@@ -130,9 +130,11 @@ int main(int argc, const char* argv[]) {
                 std::cin >> key;
                 std::cin >> key2;
                 std::cout << "\n--- Bulk ---\n";
-                tree.printRange(key, key2);
+                // tree.printRange(key, key2);
+                tree.printRangeWithStats(key, key2);
                 std::cout << "\n--- Normal ---\n";
-                normalTree.printRange(key, key2);
+                // normalTree.printRange(key, key2);
+                normalTree.printRangeWithStats(key, key2);
                 break;
             }
             case 't':
