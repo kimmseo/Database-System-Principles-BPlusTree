@@ -57,6 +57,8 @@ std::string LeafNode::toString(bool aVerbose) const {
     return keyToTextConverter.str();
 }
 
+std::vector<LeafNode::MappingType> LeafNode::getMappings() const { return fMappings; }
+
 int LeafNode::createAndInsertRecord(KeyType aKey, ValueType aValue) {
     gameRecord *newRecord = new gameRecord(aValue);
     insert(aKey, newRecord);

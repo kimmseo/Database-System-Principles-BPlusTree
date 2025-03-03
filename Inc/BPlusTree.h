@@ -14,6 +14,14 @@ class InternalNode;
 class LeafNode;
 class Node;
 
+struct QueryStats {  // for task 3
+    int indexNodesAccessed = 0;
+    int dataBlocksAccessed = 0;
+    double avgFG3Pct = 0.0;
+    int recordCount = 0;
+    double queryTime = 0.0;
+};
+
 /// Main class providing the API for the B+ Tree
 class BPlusTree {
   public:
@@ -58,6 +66,7 @@ class BPlusTree {
     /// Print key, value, and address for each item in the range
     /// from aStart to aEnd, including both.
     void printRange(KeyType aStart, KeyType aEnd);
+    void printRangeWithStats(KeyType aStart, KeyType aEnd);
 
     /// Remove all elements from the B+ tree. You can then build
     /// it up again by inserting new elements into it.
@@ -97,13 +106,17 @@ class BPlusTree {
     void redistribute(N* aNeighborNode, N* aNode, InternalNode* aParent, int aIndex);
     void adjustRoot();
     LeafNode* findLeafNode(KeyType aKey, bool aPrinting = false, bool aVerbose = false);
+    LeafNode* findLeafNodeWithCount(KeyType aKey, int* indexNodeCount, bool aPrinting = false,
+                                    bool aVerbose = false);
     void printValue(KeyType aKey, bool aPrintPath, bool aVerbose);
     std::vector<EntryType> range(KeyType aStart, KeyType aEnd);
+    QueryStats rangeWithStats(KeyType aStart, KeyType aEnd);
+    QueryStats rangeWithStatsV2(KeyType aStart, KeyType aEnd);
+    QueryStats linearScan(KeyType aStart, KeyType aEnd);
+
     const int fOrder;
     Node* fRoot;
     Printer fPrinter;
-    std::vector<std::pair<KeyType, ValueType>> loadDataForNormalInsert(const std::string& filename,
-                                                                       int keyColumn);
 };
 
 #endif  // BPLUSTREE_H

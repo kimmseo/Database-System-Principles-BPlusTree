@@ -38,6 +38,7 @@ class LeafNode : public Node {
     void copyRange(KeyType aStart, KeyType aEnd, std::vector<EntryType>& aVector);
     void copyFullRange(std::vector<EntryType>& aVector);
     [[nodiscard]] std::string toString(bool aVerbose = false) const override;
+    std::vector<MappingType> getMappings() const;
 
   private:
     void copyHalfFrom(std::vector<MappingType>& aMappings);

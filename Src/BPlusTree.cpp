@@ -176,6 +176,59 @@ void BPlusTree::adjustRoot() {
 }
 
 // Utilitise and printing
+LeafNode *BPlusTree::findLeafNodeWithCount(KeyType aKey, int *indexNodeCount, bool aPrinting,
+                                           bool aVerbose) {
+    if (isEmpty()) {
+        if (aPrinting) {
+            std::cout << "Not found: empty tree." << std::endl;
+        }
+        return nullptr;
+    }
+
+    auto node = fRoot;
+
+    if (aPrinting) {
+        std::cout << "Root: ";
+        if (fRoot->isLeaf()) {
+            std::cout << "\t" << static_cast<LeafNode *>(fRoot)->toString(aVerbose);
+        } else {
+            std::cout << "\t" << static_cast<InternalNode *>(fRoot)->toString(aVerbose);
+        }
+        std::cout << std::endl;
+    }
+
+    // Added visited nodes tracking to detect infinite loops, since data is large and terminal may
+    // explode
+    std::unordered_set<Node *> visitedNodes;
+
+    while (!node->isLeaf()) {
+        (*indexNodeCount)++;
+        // Track if node visited.
+        if (visitedNodes.find(node) != visitedNodes.end()) {
+            std::cerr << "ERROR: Infinite loop detected in findLeafNode()! Node already visited: "
+                      << node << std::endl;
+            return nullptr;
+        }
+        visitedNodes.insert(node);
+
+        auto internalNode = static_cast<InternalNode *>(node);
+        // Debug
+        // std::cout << "Current internal node: " << internalNode->firstKey() << std::endl;
+
+        Node *nextNode = internalNode->lookup(aKey);
+        // Debug
+        // std::cout << "Next node: " << nextNode << std::endl;
+
+        if (nextNode == nullptr) {
+            std::cerr << "ERROR: lookup() returned nullptr for key " << aKey << std::endl;
+            return nullptr;
+        }
+
+        node = nextNode;
+    }
+
+    return static_cast<LeafNode *>(node);
+}
 
 LeafNode *BPlusTree::findLeafNode(KeyType aKey, bool aPrinting, bool aVerbose) {
     if (isEmpty()) {
@@ -304,6 +357,163 @@ void BPlusTree::printRange(KeyType aStart, KeyType aEnd) {
         std::cout << "    Value: " << std::get<1>(entry);
         std::cout << "    Leaf: " << std::hex << std::get<2>(entry) << std::dec << std::endl;
     }
+}
+
+QueryStats BPlusTree::rangeWithStats(KeyType aStart, KeyType aEnd) {
+    QueryStats stats;
+
+    auto startTime = std::chrono::high_resolution_clock::now();
+
+    auto startLeaf = findLeafNodeWithCount(
+        aStart, &stats.indexNodesAccessed);  // Enable verbose to count index nodes
+    auto endLeaf = findLeafNodeWithCount(aEnd, &stats.indexNodesAccessed);
+
+    if (!startLeaf || !endLeaf) {
+        return stats;  // Return empty stats if range is invalid
+    }
+
+    std::vector<std::tuple<KeyType, ValueType, LeafNode *>> entries;
+    stats.dataBlocksAccessed = 0;
+    double fg3Sum = 0.0;
+
+    if (startLeaf == endLeaf) {
+        startLeaf->copyRange(aStart, aEnd, entries);
+        stats.dataBlocksAccessed++;  // Single data block accessed
+    } else {
+        startLeaf->copyRangeStartingFrom(aStart, entries);
+        stats.dataBlocksAccessed++;
+        startLeaf = startLeaf->next();
+
+        while (startLeaf && startLeaf != endLeaf) {
+            startLeaf->copyFullRange(entries);
+            stats.dataBlocksAccessed++;
+            startLeaf = startLeaf->next();
+        }
+
+        startLeaf->copyRangeUntil(aEnd, entries);
+        stats.dataBlocksAccessed++;
+    }
+
+    auto endTime = std::chrono::high_resolution_clock::now();
+    stats.queryTime = std::chrono::duration<double>(endTime - startTime).count();
+
+    // Calculate avg FG3_PCT_home
+    for (const auto &entry : entries) {
+        fg3Sum += std::get<1>(entry).FG3_PCT_home;
+    }
+
+    stats.recordCount = entries.size();
+    if (stats.recordCount > 0) {
+        stats.avgFG3Pct = fg3Sum / stats.recordCount;
+    }
+
+    return stats;
+}
+
+QueryStats BPlusTree::rangeWithStatsV2(KeyType aStart, KeyType aEnd) {
+    QueryStats stats;
+
+    auto startTime = std::chrono::high_resolution_clock::now();
+
+    LeafNode *currentLeaf = findLeafNodeWithCount(aStart, &stats.indexNodesAccessed);
+    if (!currentLeaf) {
+        return stats;  // Return empty stats if no valid starting node
+    }
+
+    std::vector<std::tuple<KeyType, ValueType, LeafNode *>> entries;
+    stats.dataBlocksAccessed = 0;
+    double fg3Sum = 0.0;
+
+    while (currentLeaf) {
+        stats.dataBlocksAccessed++;
+
+        for (const auto &mapping : currentLeaf->getMappings()) {
+            KeyType key = mapping.first;
+
+            if (key > aEnd) {
+                auto endTime = std::chrono::high_resolution_clock::now();
+                stats.queryTime = std::chrono::duration<double>(endTime - startTime).count();
+                stats.recordCount = entries.size();
+                if (stats.recordCount > 0) {
+                    stats.avgFG3Pct = fg3Sum / stats.recordCount;
+                }
+                return stats;
+            }
+
+            if (key >= aStart) {
+                for (ValueType *valuePtr : mapping.second) {
+                    entries.emplace_back(key, *valuePtr, currentLeaf);
+                    fg3Sum += valuePtr->FG3_PCT_home;
+                }
+            }
+        }
+
+        currentLeaf = currentLeaf->next();
+    }
+
+    auto endTime = std::chrono::high_resolution_clock::now();
+    stats.queryTime = std::chrono::duration<double>(endTime - startTime).count();
+    stats.recordCount = entries.size();
+    if (stats.recordCount > 0) {
+        stats.avgFG3Pct = fg3Sum / stats.recordCount;
+    }
+
+    return stats;
+}
+
+QueryStats BPlusTree::linearScan(KeyType aStart, KeyType aEnd) {
+    QueryStats stats;
+
+    auto startTime = std::chrono::high_resolution_clock::now();
+
+    // Start at the root and traverse down to the leftmost leaf
+    Node *node = fRoot;
+    while (node && !node->isLeaf()) {
+        node = static_cast<InternalNode *>(node)->firstChild();
+    }
+
+    LeafNode *leaf = static_cast<LeafNode *>(node);
+    double fg3Sum = 0.0;
+
+    while (leaf) {
+        stats.dataBlocksAccessed++;
+
+        for (const auto &mapping : leaf->getMappings()) {
+            KeyType key = mapping.first;
+            if (key >= aStart && key <= aEnd) {
+                for (const ValueType *valuePtr : mapping.second) {
+                    fg3Sum += valuePtr->FG3_PCT_home;
+                    stats.recordCount++;
+                }
+            }
+        }
+        leaf = leaf->next();  // Move to the next leaf
+    }
+
+    auto endTime = std::chrono::high_resolution_clock::now();
+    stats.queryTime = std::chrono::duration<double>(endTime - startTime).count();
+
+    if (stats.recordCount > 0) {
+        stats.avgFG3Pct = fg3Sum / stats.recordCount;
+    }
+
+    return stats;
+}
+
+void BPlusTree::printRangeWithStats(KeyType aStart, KeyType aEnd) {
+    QueryStats indexQueryStats = rangeWithStatsV2(aStart, aEnd);
+    QueryStats linearScanStats = linearScan(aStart, aEnd);
+
+    std::cout << "\nB+ Tree Indexed Range Query Statistics:\n";
+    std::cout << "Index Nodes Accessed: " << indexQueryStats.indexNodesAccessed << "\n";
+    std::cout << "Data Blocks Accessed: " << indexQueryStats.dataBlocksAccessed << "\n";
+    std::cout << "Avg FG3_PCT_home: " << indexQueryStats.avgFG3Pct << "\n";
+    std::cout << "Query Execution Time: " << indexQueryStats.queryTime << " seconds\n";
+
+    std::cout << "\nBrute-Force Linear Scan Statistics:\n";
+    std::cout << "Data Blocks Accessed: " << linearScanStats.dataBlocksAccessed << "\n";
+    std::cout << "Avg FG3_PCT_home: " << linearScanStats.avgFG3Pct << "\n";
+    std::cout << "Query Execution Time: " << linearScanStats.queryTime << " seconds\n";
 }
 
 std::vector<BPlusTree::EntryType> BPlusTree::range(KeyType aStart, KeyType aEnd) {
