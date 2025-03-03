@@ -374,7 +374,7 @@ QueryStats BPlusTree::rangeWithStats(KeyType aStart, KeyType aEnd) {
 
     std::vector<std::tuple<KeyType, ValueType, LeafNode *>> entries;
     stats.dataBlocksAccessed = 0;
-    double fg3Sum = 0.0;
+    double fgsum = 0.0;
 
     if (startLeaf == endLeaf) {
         startLeaf->copyRange(aStart, aEnd, entries);
@@ -397,14 +397,14 @@ QueryStats BPlusTree::rangeWithStats(KeyType aStart, KeyType aEnd) {
     auto endTime = std::chrono::high_resolution_clock::now();
     stats.queryTime = std::chrono::duration<double>(endTime - startTime).count();
 
-    // Calculate avg FG3_PCT_home
+    // Calculate avg FG_PCT_home
     for (const auto &entry : entries) {
-        fg3Sum += std::get<1>(entry).FG3_PCT_home;
+        fgsum += std::get<1>(entry).FG_PCT_home;
     }
 
     stats.recordCount = entries.size();
     if (stats.recordCount > 0) {
-        stats.avgFG3Pct = fg3Sum / stats.recordCount;
+        stats.avgfgpct = fgsum / stats.recordCount;
     }
 
     return stats;
@@ -422,7 +422,7 @@ QueryStats BPlusTree::rangeWithStatsV2(KeyType aStart, KeyType aEnd) {
 
     std::vector<std::tuple<KeyType, ValueType, LeafNode *>> entries;
     stats.dataBlocksAccessed = 0;
-    double fg3Sum = 0.0;
+    double fgsum = 0.0;
 
     while (currentLeaf) {
         stats.dataBlocksAccessed++;
@@ -435,7 +435,7 @@ QueryStats BPlusTree::rangeWithStatsV2(KeyType aStart, KeyType aEnd) {
                 stats.queryTime = std::chrono::duration<double>(endTime - startTime).count();
                 stats.recordCount = entries.size();
                 if (stats.recordCount > 0) {
-                    stats.avgFG3Pct = fg3Sum / stats.recordCount;
+                    stats.avgfgpct = fgsum / stats.recordCount;
                 }
                 return stats;
             }
@@ -443,7 +443,7 @@ QueryStats BPlusTree::rangeWithStatsV2(KeyType aStart, KeyType aEnd) {
             if (key >= aStart) {
                 for (ValueType *valuePtr : mapping.second) {
                     entries.emplace_back(key, *valuePtr, currentLeaf);
-                    fg3Sum += valuePtr->FG3_PCT_home;
+                    fgsum += valuePtr->FG_PCT_home;
                 }
             }
         }
@@ -455,7 +455,7 @@ QueryStats BPlusTree::rangeWithStatsV2(KeyType aStart, KeyType aEnd) {
     stats.queryTime = std::chrono::duration<double>(endTime - startTime).count();
     stats.recordCount = entries.size();
     if (stats.recordCount > 0) {
-        stats.avgFG3Pct = fg3Sum / stats.recordCount;
+        stats.avgfgpct = fgsum / stats.recordCount;
     }
 
     return stats;
@@ -473,7 +473,7 @@ QueryStats BPlusTree::linearScan(KeyType aStart, KeyType aEnd) {
     }
 
     LeafNode *leaf = static_cast<LeafNode *>(node);
-    double fg3Sum = 0.0;
+    double fgsum = 0.0;
 
     while (leaf) {
         stats.dataBlocksAccessed++;
@@ -482,7 +482,7 @@ QueryStats BPlusTree::linearScan(KeyType aStart, KeyType aEnd) {
             KeyType key = mapping.first;
             if (key >= aStart && key <= aEnd) {
                 for (const ValueType *valuePtr : mapping.second) {
-                    fg3Sum += valuePtr->FG3_PCT_home;
+                    fgsum += valuePtr->FG_PCT_home;
                     stats.recordCount++;
                 }
             }
@@ -494,7 +494,7 @@ QueryStats BPlusTree::linearScan(KeyType aStart, KeyType aEnd) {
     stats.queryTime = std::chrono::duration<double>(endTime - startTime).count();
 
     if (stats.recordCount > 0) {
-        stats.avgFG3Pct = fg3Sum / stats.recordCount;
+        stats.avgfgpct = fgsum / stats.recordCount;
     }
 
     return stats;
@@ -507,12 +507,12 @@ void BPlusTree::printRangeWithStats(KeyType aStart, KeyType aEnd) {
     std::cout << "\nB+ Tree Indexed Range Query Statistics:\n";
     std::cout << "Index Nodes Accessed: " << indexQueryStats.indexNodesAccessed << "\n";
     std::cout << "Data Blocks Accessed: " << indexQueryStats.dataBlocksAccessed << "\n";
-    std::cout << "Avg FG3_PCT_home: " << indexQueryStats.avgFG3Pct << "\n";
+    std::cout << "Avg FG_PCT_home: " << indexQueryStats.avgfgpct << "\n";
     std::cout << "Query Execution Time: " << indexQueryStats.queryTime << " seconds\n";
 
     std::cout << "\nBrute-Force Linear Scan Statistics:\n";
     std::cout << "Data Blocks Accessed: " << linearScanStats.dataBlocksAccessed << "\n";
-    std::cout << "Avg FG3_PCT_home: " << linearScanStats.avgFG3Pct << "\n";
+    std::cout << "Avg FG_PCT_home: " << linearScanStats.avgfgpct << "\n";
     std::cout << "Query Execution Time: " << linearScanStats.queryTime << " seconds\n";
 }
 

@@ -17,7 +17,7 @@ class Node;
 struct QueryStats {  // for task 3
     int indexNodesAccessed = 0;
     int dataBlocksAccessed = 0;
-    double avgFG3Pct = 0.0;
+    double avgfgpct = 0.0;
     int recordCount = 0;
     double queryTime = 0.0;
 };
