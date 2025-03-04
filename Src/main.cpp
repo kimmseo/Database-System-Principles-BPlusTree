@@ -158,6 +158,8 @@ int main(int argc, const char* argv[]) {
                 tree.print();
                 break;
             case 'm':
+                std::cout << "\n--- Parameter n of B+ tree ---\n";
+                std::cout << "Order: " << order << std::endl;
                 std::cout << "\n--- Bulk ---\n";
                 tree.printTreeInfo();
                 std::cout << "\n--- Normal ---\n";
