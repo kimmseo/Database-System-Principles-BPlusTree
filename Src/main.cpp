@@ -64,6 +64,7 @@ int main(int argc, const char* argv[]) {
     std::cout << introMessage(order);
     BPlusTree tree(order);
     // Load data
+    // Edit if needed
     std::string filename = "../Src/games.txt";
     int keyColumn = 3;  // Column 3 (FG_PCT_home) as key
     tree.bulkLoadFromCSV(filename, keyColumn);

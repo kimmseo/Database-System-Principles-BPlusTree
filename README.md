@@ -43,3 +43,6 @@ input 'm' into terminal to check the parameter n of B+ tree, number of nodes of 
 
 # Task 3
 To get details for task 3, input 'r 0.6 0.9' into the terminal.
+
+# Misc
+If file is unable to be read, edit path "std::string filename" if needed.
