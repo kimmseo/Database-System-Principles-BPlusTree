@@ -47,15 +47,15 @@ inline int safeStoi(const std::string& str) {
 }
 
 struct gameRecord {
-    std::string GAME_DATE_EST;
-    unsigned int TEAM_ID_home;
-    unsigned short PTS_home;
-    float FG_PCT_home;
-    float FT_PCT_home;
-    float FG3_PCT_home;
-    unsigned short AST_home;
-    unsigned short REB_home;
-    bool HOME_TEAM_WINS;
+    std::string GAME_DATE_EST;  //Date the game was held
+    unsigned int TEAM_ID_home;  //Team ID of hometeam
+    unsigned short PTS_home;    //Points scored by hometeam
+    float FG_PCT_home;          //Final goal percentage
+    float FT_PCT_home;          //Free throw percentage
+    float FG3_PCT_home;         //3-point final goal percentage
+    unsigned short AST_home;    //Assists scored
+    unsigned short REB_home;    //Rebounds
+    bool HOME_TEAM_WINS;        //Boolean for win(1) or loss(0)
 
     gameRecord()
         : GAME_DATE_EST(""),
