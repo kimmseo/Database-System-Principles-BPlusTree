@@ -16,6 +16,8 @@
 #include <algorithm>
 #include <sstream>
 #include <vector>
+#include "CSV.h"
+#include <algorithm>
 
 BPlusTree::BPlusTree(int aOrder) : fOrder{aOrder}, fRoot{nullptr} {}
 
@@ -591,9 +593,6 @@ void BPlusTree::printTreeInfo() {
     }
     std::cout << "" << std::endl;
 }
-
-#include "CSV.h"
-#include <algorithm>
 
 std::string trim(const std::string &str) {
     size_t first = str.find_first_not_of(" \t");

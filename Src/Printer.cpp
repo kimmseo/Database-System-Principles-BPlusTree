@@ -6,7 +6,6 @@
 #include "InternalNode.h"
 #include "LeafNode.h"
 #include "Node.h"
-
 #include "Printer.h"
 
 Printer::Printer() : fVerbose(false) {}
