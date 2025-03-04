@@ -16,7 +16,7 @@ cmake --build build   # Compile the project
 
 # This set of instructions was built and compiled using Visual Studios.
 # Run this if above doesn't work
-cmake ..
+cmake -S . -B build 
 cmake --build build
 cd build
 Debug\Database_System_Principles_Project_1.exe 
