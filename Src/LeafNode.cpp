@@ -61,8 +61,8 @@ std::vector<LeafNode::MappingType> LeafNode::getMappings() const { return fMappi
 
 unsigned int LeafNode::getMappingsSize() const {
     unsigned int totalCount = 0;
-    for (const auto& mapping : fMappings) {
-        const std::vector<ValueType*>& valueVector = mapping.second;
+    for (const auto &mapping : fMappings) {
+        const std::vector<ValueType *> &valueVector = mapping.second;
         totalCount += valueVector.size();
     }
     return totalCount;
