@@ -67,7 +67,6 @@ int main(int argc, const char* argv[]) {
     // Edit if needed
     std::string filename = "../Src/games.txt";
     int keyColumn = 3;  // Column 3 (FG_PCT_home) as key
-    tree.bulkLoadFromCSV(filename, keyColumn);
     std::cout << "\n--- Bulk Loading ---\n";
     double bulkTime = tree.bulkLoadFromCSV(filename, keyColumn);
     std::cout << "Bulk Loading Time: " << bulkTime << " seconds.\n";
