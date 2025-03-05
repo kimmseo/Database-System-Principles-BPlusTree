@@ -1,0 +1,11 @@
+# ninja log v6
+24	650	7628921427082358	CMakeFiles/Database_System_Principles_Project_1.dir/Src/Node.cpp.obj	d812bccdf8a508e3
+8	654	7628921426922351	CMakeFiles/Database_System_Principles_Project_1.dir/Src/DiskManager.cpp.obj	391206e4a3bab131
+34	713	7628921427182366	CMakeFiles/Database_System_Principles_Project_1.dir/Src/Record.cpp.obj	a845a9461d51f56a
+12	717	7628921426962340	CMakeFiles/Database_System_Principles_Project_1.dir/Src/Exceptions.cpp.obj	a621e90977fb970b
+29	814	7628921427132352	CMakeFiles/Database_System_Principles_Project_1.dir/Src/Printer.cpp.obj	245f49fb74c22a41
+39	821	7628921427232371	CMakeFiles/Database_System_Principles_Project_1.dir/Src/main.cpp.obj	8cf14204d72acfcb
+16	933	7628921427002350	CMakeFiles/Database_System_Principles_Project_1.dir/Src/InternalNode.cpp.obj	32fb0e6eea5579b0
+20	1148	7628921427042360	CMakeFiles/Database_System_Principles_Project_1.dir/Src/LeafNode.cpp.obj	f071c9d96dfbf8d3
+3	2502	7628921426872410	CMakeFiles/Database_System_Principles_Project_1.dir/Src/BPlusTree.cpp.obj	c2493ffbdb2f9529
+2502	3001	7628921451862915	Database_System_Principles_Project_1.exe	494540a4743f8cdd
