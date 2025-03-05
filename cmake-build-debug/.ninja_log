@@ -1,0 +1,22 @@
+# ninja log v6
+5	1956	7628918212233722	CMakeFiles/Database_System_Principles_Project_1.dir/Src/BPlusTree.cpp.obj	c2493ffbdb2f9529
+26	699	7628918212453718	CMakeFiles/Database_System_Principles_Project_1.dir/Src/Node.cpp.obj	d812bccdf8a508e3
+47	1044	7628918212663732	CMakeFiles/Database_System_Principles_Project_1.dir/Src/Util.cpp.obj	6c34581717d236f6
+40	790	7628918212593724	CMakeFiles/Database_System_Principles_Project_1.dir/Src/Record.cpp.obj	a845a9461d51f56a
+11	808	7628918212303725	CMakeFiles/Database_System_Principles_Project_1.dir/Src/Exceptions.cpp.obj	a621e90977fb970b
+33	950	7628918212523774	CMakeFiles/Database_System_Principles_Project_1.dir/Src/Printer.cpp.obj	245f49fb74c22a41
+54	939	7628918212733728	CMakeFiles/Database_System_Principles_Project_1.dir/Src/main.cpp.obj	8cf14204d72acfcb
+16	1046	7628918212353711	CMakeFiles/Database_System_Principles_Project_1.dir/Src/InternalNode.cpp.obj	32fb0e6eea5579b0
+21	1116	7628918212403724	CMakeFiles/Database_System_Principles_Project_1.dir/Src/LeafNode.cpp.obj	f071c9d96dfbf8d3
+1956	2186	7628918231749195	Database_System_Principles_Project_1.exe	be86b87227368e6a
+51	717	7625926309996109	CMakeFiles/Database_System_Principles_Project_1.dir/Src/TXTtoCSV.cpp.obj	442ff1a1ea574c2b
+19	584	7628919267015008	CMakeFiles/Database_System_Principles_Project_1.dir/Src/Node.cpp.obj	d812bccdf8a508e3
+8	630	7628919266904973	CMakeFiles/Database_System_Principles_Project_1.dir/Src/Exceptions.cpp.obj	a621e90977fb970b
+27	648	7628919267084986	CMakeFiles/Database_System_Principles_Project_1.dir/Src/Record.cpp.obj	a845a9461d51f56a
+35	746	7628919267165003	CMakeFiles/Database_System_Principles_Project_1.dir/Src/main.cpp.obj	8cf14204d72acfcb
+23	749	7628919267044986	CMakeFiles/Database_System_Principles_Project_1.dir/Src/Printer.cpp.obj	245f49fb74c22a41
+31	811	7628919267125012	CMakeFiles/Database_System_Principles_Project_1.dir/Src/Util.cpp.obj	6c34581717d236f6
+12	838	7628919266934996	CMakeFiles/Database_System_Principles_Project_1.dir/Src/InternalNode.cpp.obj	32fb0e6eea5579b0
+16	893	7628919266975014	CMakeFiles/Database_System_Principles_Project_1.dir/Src/LeafNode.cpp.obj	f071c9d96dfbf8d3
+4	1701	7628919266864980	CMakeFiles/Database_System_Principles_Project_1.dir/Src/BPlusTree.cpp.obj	c2493ffbdb2f9529
+1701	1931	7628919283823972	Database_System_Principles_Project_1.exe	be86b87227368e6a
