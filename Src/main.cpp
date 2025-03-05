@@ -34,10 +34,13 @@ std::string usageMessage() {
         "\tl -- Print the keys of the leaves (bottom row of the tree).\n"
         "\tm -- Print tree info (number of levels, number of nodes, root content).\n"
         "\tv -- Toggle output of pointer addresses (\"verbose\") in tree and leaves.\n"
+        "\tS <filename> -- Save the current B+ tree structure to <filename>.\n"
+        "\tL <filename> -- Load a B+ tree structure from <filename>.\n"
         "\tq -- Quit. (Or use Ctl-D.)\n"
         "\t? -- Print this help message.\n\n";
     return message;
 }
+
 
 int getOrder(int argc, const char* argv[]) {
     if (argc > 1) {
@@ -169,6 +172,23 @@ int main(int argc, const char* argv[]) {
             case '?':
                 std::cout << usageMessage();
                 break;
+            case 'S': {
+                // Save
+                std::string filename;
+                std::cin >> filename; // read the filename from the user
+                tree.saveToDisk(filename);
+                break;
+            }
+            case 'L': {
+                // Load
+                std::string filename;
+                std::cin >> filename; // read the filename
+                // If you want to discard the old in-memory tree first:
+                tree.loadFromDisk(filename);
+                // Optionally print or do something
+                tree.print(verbose);
+                break;
+            }
             default:
                 std::cin.ignore(256, '\n');
                 std::cout << usageMessage();

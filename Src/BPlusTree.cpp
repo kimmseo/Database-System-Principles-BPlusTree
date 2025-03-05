@@ -18,6 +18,7 @@
 #include <vector>
 #include "CSV.h"
 #include <algorithm>
+#include "DiskManager.h"
 
 BPlusTree::BPlusTree(int aOrder) : fOrder{aOrder}, fRoot{nullptr} {}
 
@@ -775,3 +776,268 @@ double BPlusTree::normalInsertFromCSV(const std::string &filename, int keyColumn
 }
 
 unsigned int BPlusTree::getNumberOfRecords(LeafNode *aLeaf) { return aLeaf->getMappingsSize(); }
+void BPlusTree::saveToDisk(const std::string &filename)
+{
+    if (!fRoot) {
+        std::cerr << "Tree is empty, nothing to save.\n";
+        return;
+    }
+
+    DiskManager dm(filename);
+
+    // 1) BFS to assign nodeIDs
+    std::queue<Node*> nodeQ;
+    nodeQ.push(fRoot);
+
+    std::unordered_map<Node*, int> nodeIDMap;
+    int currentID = 0;
+
+    while (!nodeQ.empty()) {
+        Node* node = nodeQ.front();
+        nodeQ.pop();
+
+        if (nodeIDMap.find(node) == nodeIDMap.end()) {
+            nodeIDMap[node] = currentID++;
+            // Debug
+            std::cout << "[DEBUG saveToDisk] Assigning nodeID=" << (currentID-1)
+                      << " to Node*=" << node 
+                      << " (isLeaf=" << node->isLeaf() << ")\n";
+        }
+
+        // If internal, push children
+        if (!node->isLeaf()) {
+            InternalNode* in = static_cast<InternalNode*>(node);
+            if (in->firstChild()) {
+                nodeQ.push(in->firstChild());
+            }
+            // We need access to fMappings, so either make it public or
+            // create a getter. Here we assume it's accessible:
+            for (int i = 0; i < in->size(); i++) {
+                Node* child = in->neighbour(i+1);
+                if (child && nodeIDMap.find(child) == nodeIDMap.end()) {
+                    nodeQ.push(child);
+                }
+            }
+        } else {
+            // If leaf, push next leaf
+            LeafNode* ln = static_cast<LeafNode*>(node);
+            if (ln->next() && nodeIDMap.find(ln->next()) == nodeIDMap.end()) {
+                nodeQ.push(ln->next());
+            }
+        }
+    }
+
+    // 2) BFS again to actually write the blocks
+    //    (or you can store the BFS results in a vector)
+    nodeQ.push(fRoot);
+    std::unordered_set<Node*> visited;
+
+    while (!nodeQ.empty()) {
+        Node* node = nodeQ.front();
+        nodeQ.pop();
+        if (visited.find(node) != visited.end()) continue;
+        visited.insert(node);
+
+        NodeBlock block;
+        int thisID = nodeIDMap[node];
+        block.nodeID = thisID;
+        block.isLeaf = node->isLeaf();
+        block.size = node->size();
+
+        // parentID
+        if (node->parent()) {
+            block.parentID = nodeIDMap[node->parent()];
+        } else {
+            block.parentID = -1; // root
+        }
+
+        if (block.isLeaf) {
+            LeafNode* ln = static_cast<LeafNode*>(node);
+            // next leaf
+            if (ln->next()) {
+                block.nextLeafID = nodeIDMap[ln->next()];
+            } else {
+                block.nextLeafID = -1;
+            }
+
+            // copy leaf keys
+            for (int i = 0; i < ln->size(); i++) {
+                block.leafKeys[i] = ln->getMappings()[i].first;
+                // If you want to store partial data from each record,
+                // you'd store it here, e.g. block.leafData[i] = ...
+            }
+        } else {
+            InternalNode* in = static_cast<InternalNode*>(node);
+            // left child
+            if (in->firstChild()) {
+                block.leftChildID = nodeIDMap[in->firstChild()];
+            } else {
+                block.leftChildID = -1;
+            }
+
+            // copy keys + childIDs
+            for (int i = 0; i < in->size(); i++) {
+                block.keys[i] = in->keyAt(i);
+                Node* child = in->neighbour(i+1);
+                block.childIDs[i] = (child ? nodeIDMap[child] : -1);
+            }
+        }
+
+        // Debug print
+        std::cout << "[DEBUG saveToDisk] Writing blockID=" << thisID
+                  << " isLeaf=" << block.isLeaf
+                  << " size=" << block.size
+                  << " parentID=" << block.parentID
+                  << " nextLeafID=" << block.nextLeafID
+                  << " leftChildID=" << block.leftChildID << "\n";
+        for (int i = 0; i < block.size; i++) {
+            if (block.isLeaf) {
+                std::cout << "   leafKeys[" << i << "]=" << block.leafKeys[i] << "\n";
+            } else {
+                std::cout << "   keys[" << i << "]=" << block.keys[i]
+                          << " childIDs[" << i << "]=" << block.childIDs[i] << "\n";
+            }
+        }
+
+        dm.writeBlock(thisID, block);
+
+        // Push children to BFS
+        if (!block.isLeaf) {
+            InternalNode* in = static_cast<InternalNode*>(node);
+            if (in->firstChild()) nodeQ.push(in->firstChild());
+            for (int i = 0; i < in->size(); i++) {
+                Node* c = in->neighbour(i+1);
+                if (c) nodeQ.push(c);
+            }
+        } else {
+            LeafNode* ln = static_cast<LeafNode*>(node);
+            if (ln->next()) nodeQ.push(ln->next());
+        }
+    }
+
+    std::cout << "[DEBUG saveToDisk] B+ Tree saved to " << filename 
+              << " with total blocks=" << currentID << "\n";
+}
+void BPlusTree::loadFromDisk(const std::string &filename)
+{
+    DiskManager dm(filename);
+
+    std::vector<NodeBlock> blocks;
+    NodeBlock temp;
+    int blockID = 0;
+
+    // 1) Read all blocks until readBlock fails
+    while (dm.readBlock(blockID, temp)) {
+        // debug print what we read
+        std::cout << "[DEBUG loadFromDisk] readBlock(" << blockID << "):\n"
+                  << "   nodeID=" << temp.nodeID
+                  << " isLeaf=" << temp.isLeaf
+                  << " size=" << temp.size
+                  << " parentID=" << temp.parentID
+                  << " nextLeafID=" << temp.nextLeafID
+                  << " leftChildID=" << temp.leftChildID << "\n";
+        for (int i = 0; i < temp.size; i++) {
+            if (temp.isLeaf) {
+                std::cout << "      leafKeys[" << i << "]=" << temp.leafKeys[i] << "\n";
+            } else {
+                std::cout << "      keys[" << i << "]=" << temp.keys[i]
+                          << " childIDs[" << i << "]=" << temp.childIDs[i] << "\n";
+            }
+        }
+
+        blocks.push_back(temp);
+        blockID++;
+    }
+
+    if (blocks.empty()) {
+        std::cerr << "[DEBUG loadFromDisk] No blocks read from " << filename << "\n";
+        fRoot = nullptr;
+        return;
+    }
+
+    // 2) create Node* array
+    //    assume nodeIDs go from 0..(blocks.size()-1)
+    std::vector<Node*> nodePtr(blocks.size(), nullptr);
+
+    // first pass: allocate LeafNode or InternalNode
+    for (auto &b : blocks) {
+        Node* newNode = nullptr;
+        if (b.isLeaf) {
+            newNode = new LeafNode(fOrder);
+            std::cout << "[DEBUG loadFromDisk] Creating LeafNode for blockID=" << b.nodeID << "\n";
+        } else {
+            newNode = new InternalNode(fOrder);
+            std::cout << "[DEBUG loadFromDisk] Creating InternalNode for blockID=" << b.nodeID << "\n";
+        }
+        nodePtr[b.nodeID] = newNode;
+    }
+
+    // 3) second pass: fill pointers, keys, etc.
+    for (auto &b : blocks) {
+        Node* n = nodePtr[b.nodeID];
+        // set parent
+        if (b.parentID >= 0 && b.parentID < (int)nodePtr.size()) {
+            n->setParent(nodePtr[b.parentID]);
+        } else {
+            // -1 => root
+            std::cout << "[DEBUG loadFromDisk] blockID=" << b.nodeID 
+                      << " has parentID=" << b.parentID << " => possibly root.\n";
+        }
+
+        if (b.isLeaf) {
+            LeafNode* ln = static_cast<LeafNode*>(n);
+            // next leaf
+            if (b.nextLeafID >= 0 && b.nextLeafID < (int)nodePtr.size()) {
+                ln->setNext(static_cast<LeafNode*>(nodePtr[b.nextLeafID]));
+                std::cout << "[DEBUG loadFromDisk] Leaf " << b.nodeID 
+                          << " nextLeaf=" << b.nextLeafID << "\n";
+            }
+            // rebuild fMappings
+            for (int i = 0; i < b.size; i++) {
+                float key = b.leafKeys[i];
+                // if you stored partial data, you'd reconstruct ValueType
+                // for now, just do something like:
+                ValueType dummyVal; // or from block
+                ln->createAndInsertRecord(key, dummyVal);
+            }
+        } else {
+            InternalNode* in = static_cast<InternalNode*>(n);
+            // leftChild
+            if (b.leftChildID >= 0 && b.leftChildID < (int)nodePtr.size()) {
+                in->fLeftChild = nodePtr[b.leftChildID];
+                in->fLeftChild->setParent(in);
+                std::cout << "[DEBUG loadFromDisk] Internal " << b.nodeID 
+                          << " leftChild=" << b.leftChildID << "\n";
+            }
+            // fMappings
+            for (int i = 0; i < b.size; i++) {
+                float key = b.keys[i];
+                int cID = b.childIDs[i];
+                if (cID >= 0 && cID < (int)nodePtr.size()) {
+                    Node* childPtr = nodePtr[cID];
+                    childPtr->setParent(in);
+                    in->fMappings.push_back({key, childPtr});
+                    std::cout << "[DEBUG loadFromDisk] Internal " << b.nodeID 
+                              << " key[" << i << "]=" << key
+                              << " childID[" << i << "]=" << cID << "\n";
+                }
+            }
+        }
+    }
+
+    // 4) find root (the node with parentID = -1)
+    fRoot = nullptr;
+    for (auto &b : blocks) {
+        if (b.parentID < 0) {
+            fRoot = nodePtr[b.nodeID];
+            std::cout << "[DEBUG loadFromDisk] Found root nodeID=" << b.nodeID << "\n";
+            break;
+        }
+    }
+
+    if (!fRoot) {
+        std::cerr << "[DEBUG loadFromDisk] No root found. Possibly corrupt file.\n";
+    }
+
+    std::cout << "[DEBUG loadFromDisk] B+ Tree loaded from " << filename << "\n";
+}
