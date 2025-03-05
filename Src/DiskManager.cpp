@@ -1,10 +1,10 @@
 #include "DiskManager.h"
-#include <cstring> // for memset
+#include <cstring>  // for memset
 
 DiskManager::DiskManager(const std::string &filename) : nextBlockID(0) {
     // open or create
     file.open(filename, std::ios::in | std::ios::out | std::ios::binary);
-    if(!file.is_open()) {
+    if (!file.is_open()) {
         // create new file
         file.clear();
         file.open(filename, std::ios::out | std::ios::binary);
@@ -15,21 +15,19 @@ DiskManager::DiskManager(const std::string &filename) : nextBlockID(0) {
 
 bool DiskManager::readBlock(int blockID, NodeBlock &outBlock) {
     file.seekg(blockID * BLOCK_SIZE, std::ios::beg);
-    if(!file.good()) return false;
+    if (!file.good()) return false;
 
-    file.read(reinterpret_cast<char*>(&outBlock), sizeof(NodeBlock));
+    file.read(reinterpret_cast<char *>(&outBlock), sizeof(NodeBlock));
     return file.good();
 }
 
 bool DiskManager::writeBlock(int blockID, const NodeBlock &inBlock) {
     file.seekp(blockID * BLOCK_SIZE, std::ios::beg);
-    if(!file.good()) return false;
+    if (!file.good()) return false;
 
-    file.write(reinterpret_cast<const char*>(&inBlock), sizeof(NodeBlock));
+    file.write(reinterpret_cast<const char *>(&inBlock), sizeof(NodeBlock));
     file.flush();
     return file.good();
 }
 
-int DiskManager::allocateBlockID() {
-    return nextBlockID++;
-}
+int DiskManager::allocateBlockID() { return nextBlockID++; }

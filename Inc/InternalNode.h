@@ -40,13 +40,12 @@ class InternalNode : public Node {
     [[nodiscard]] const KeyType firstKey() const override;
     Node* fLeftChild;
     std::vector<MappingType> fMappings;
-    
+
   private:
     void copyHalfFrom(std::vector<MappingType>& aMappings);
     void copyAllFrom(std::vector<MappingType>& aMappings);
     void copyLastFrom(MappingType aPair);
     void copyFirstFrom(MappingType aPair, int aParentIndex);
-
 };
 
 #endif  // INTERNALNODE_H

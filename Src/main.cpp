@@ -41,7 +41,6 @@ std::string usageMessage() {
     return message;
 }
 
-
 int getOrder(int argc, const char* argv[]) {
     if (argc > 1) {
         int order = 0;
@@ -174,14 +173,14 @@ int main(int argc, const char* argv[]) {
             case 'S': {
                 // Save
                 std::string filename;
-                std::cin >> filename; // read the filename from the user
+                std::cin >> filename;  // read the filename from the user
                 tree.saveToDisk(filename);
                 break;
             }
             case 'L': {
                 // Load
                 std::string filename;
-                std::cin >> filename; // read the filename
+                std::cin >> filename;  // read the filename
                 // If you want to discard the old in-memory tree first:
                 tree.loadFromDisk(filename);
                 // Optionally print or do something
