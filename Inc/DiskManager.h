@@ -16,13 +16,12 @@ struct NodeBlock {
     int leftChildID;       // if internal, store fLeftChild’s ID or -1
 
     // For internal node:
-    float keys[50];        // adjust size to fit your "order"
-    int childIDs[50];      // child pointers
+    float keys[50];        
+    int childIDs[50];      
 
     // For leaf node:
-    float leafKeys[50];    // the keys
-    // You can store partial "ValueType" if it fits,
-    // or store offsets to data in a separate file.
+    float leafKeys[50];   
+
 
     // constructor
     NodeBlock() {

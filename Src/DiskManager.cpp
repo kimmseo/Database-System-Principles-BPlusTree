@@ -31,7 +31,5 @@ bool DiskManager::writeBlock(int blockID, const NodeBlock &inBlock) {
 }
 
 int DiskManager::allocateBlockID() {
-    // naive approach: just return nextBlockID++
-    // or you can track free blocks, etc.
     return nextBlockID++;
 }
